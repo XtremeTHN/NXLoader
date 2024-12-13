@@ -95,21 +95,20 @@ class SwitchUsb:
         self.dev.reset()
         usb.util.dispose_resources(self.dev)
     
+    def validate_roms(self, roms: list[Path]):
+        for file in roms:
+            if file.suffix not in [".nsp", ".xci"]:
+                continue
+            yield str(file) + "\n"
+        
     def send_roms_folder(self, folder: str):
         folder = Path(folder)
 
         if folder.is_dir() is False:
             raise FileNotFoundError(f"{folder} doesn't exists")
 
-        roms = []
-        roms_len = 0
-        roms_path = folder.iterdir()
-
-        for file in roms_path:
-            if file.suffix not in [".nsp", ".xci"]:
-                continue
-            roms.append(str(file) + "\n")
-            roms_len += len(str(file)) + 1
+        roms = self.validate_roms(folder.iterdir())
+        roms_len = sum([len(x) for x in roms])
         
         # sends header to awoo installer
         self.__send_list_header(roms_len)
