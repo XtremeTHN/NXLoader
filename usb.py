@@ -95,7 +95,7 @@ class SwitchUsb:
         self.dev.reset()
         usb.util.dispose_resources(self.dev)
 
-    def set_roms_folder(self, folder: str | Path):
+    def send_roms_folder(self, folder: str | Path):
         folder = Path(folder) if isinstance(folder, str) else folder
 
         if folder.is_dir() is False:
