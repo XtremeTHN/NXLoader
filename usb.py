@@ -97,25 +97,29 @@ class SwitchUsb:
     
     def validate_roms(self, roms: list[Path]):
         for file in roms:
-            if file.suffix not in [".nsp", ".xci"]:
+            if file.is_file() is False or file.suffix not in [".nsp", ".xci"]:
+                self.logger.warning(f"{str(file)} is not a valid rom")
                 continue
             yield str(file) + "\n"
+    
+    def send_roms(self, roms: list[str]):
+        roms_list = self.validate_roms([Path(r) for r in roms])
+        roms_len = sum([len(x) for x in roms_list])
+
+        # sends header to awoo installer
+        self.__send_list_header(roms_len)
+
+        # sends the roms one by one
+        for rom in roms_list:
+            self.out_ep.write(rom)
         
     def send_roms_folder(self, folder: str):
-        folder = Path(folder)
+        folder: Path = Path(folder)
 
         if folder.is_dir() is False:
             raise FileNotFoundError(f"{folder} doesn't exists")
 
-        roms = self.validate_roms(folder.iterdir())
-        roms_len = sum([len(x) for x in roms])
-        
-        # sends header to awoo installer
-        self.__send_list_header(roms_len)
-        
-        # sends the roms, one by one
-        for rom in roms:
-            self.out_ep.write(rom)
+        self.send_roms(folder.iterdir())
     
     def __send_file(self, prog_cb, padding=False):
         def _unpack(data):
