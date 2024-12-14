@@ -24,16 +24,10 @@ def init_log(name, log_dir="logs") -> str | None:
                 format='%(asctime)s:%(msecs)d %(name)s %(levelname)s %(message)s',
                 datefmt='%H:%M',
                 level=logging.INFO)
-    # console = logging.StreamHandler()
-    # console.setLevel(logging.DEBUG)
-    # formatter = logging.Formatter('[ %(name)s ][%(levelname)s] %(message)s')
-    # console.setFormatter(formatter)
-    # logging.getLogger('').addHandler(console)
 
 init_log("test")
 
 handlers = Handlers()
 with SwitchUsb() as usb:
-    # usb.send_roms_folder("nsp/")
     usb.send_roms([Path("nsp/Ori_v1.2.0.xci"), Path("/home/axel/Downloads/homebrew.nsp")])
     usb.poll_commands(prog_cb=handlers.progress_cb, info_cb=handlers.info_cb)
