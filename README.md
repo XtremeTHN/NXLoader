@@ -10,8 +10,7 @@ Se necesita de un socket servidor con los siguientes parametros `AF_INET` `SOCK_
 static int m_serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 ```
 ## Handshake
-Para realizar el handshake entre dispositivos se necesita de otro socket (no se porque) INET, se conecta a la ip y puerto de la switch (2000). Este socket debe mandar un el largo de un string separado por caracteres de newlines (`\n`) en donde haya informacion del host y el archivo a mandar a la switch, y luego el string en cuestion
-Ejemplo:
+Para realizar el handshake entre dispositivos se necesita de otro socket (no se porque) INET, se conecta a la ip y puerto de la switch (2000). Este socket debe mandar el largo de un string separado por caracteres de newlines (`\n`) en donde este la ip del servidor cliente y el puerto (el puerto puede ser random) y el archivo a mandar a la switch, y luego el string en cuestion:
 ```
 # first send (message length)
 67
