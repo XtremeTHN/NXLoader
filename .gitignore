@@ -1,4 +1,6 @@
 nsp
 .vscode
 .venv
+logs
 __pycache__
+.nsp
