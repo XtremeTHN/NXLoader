@@ -24,6 +24,8 @@ Este socket su unico proposito es hacer este handshake, asi que se debe cerrar d
 
 Se entra en un loop infinito en donde el socket servidor debe de aceptar la conexion de la switch, despues se reciben las solicitudes que la switch manda.
 
+## Packet handling
+
 Las solicitudes se reciben en paquetes, que se deben de guardar en una lista. El primer elemento de la lista es la solicitud, puede ser una de los siguientes:
 - `DROP`: Se utiliza cuando el programa termina
 - `HEAD`: Se utiliza para obtener el peso del archivo seleccionado. Para manejar esta solicitud se debe mandar una [solicitud de codigo 200](#CODE_200).

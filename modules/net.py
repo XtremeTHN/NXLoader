@@ -1,60 +1,12 @@
-import socket
 import logging
+import socket
 import random
+import re
+import os
 
-from datetime import datetime
-import pytz
-
+from modules.net_requests import Packets
 from urllib.parse import urlencode
-
-class Requests:
-    def __init__(self):
-        self.logger = logging.getLogger("Requests")
-        self.current_date = datetime.now(pytz.timezone('GMT')).strftime("%a, %d %b %Y %H:%M:%S GMT")
-
-    def get_code_200(self, file_size: int):
-        return "HTTP/1.0 200 OK\r\n" \
-        "Server: NXLoader Python\r\n" \
-        f"Date: {self.current_date}\r\n" \
-        "Content-type: application/octet-stream\r\n" \
-        "Accept-Ranges: bytes\r\n" \
-        f"Content-Range: bytes 0-{file_size -1}/{file_size}\r\n" \
-        f"Content-Length: {file_size}\r\n" \
-        "Last-Modified: Thu, 01 Jan 1970 00:00:00 GMT\r\n\r\n"
-
-    def get_code_206(self, start_position: int, end_position: int, file_size: int):
-        return "HTTP/1.0 206 Partial Content\r\n" \
-        "Server: NXLoader Python\r\n" \
-        f"Date: {self.current_date}\r\n" \
-        "Content-type: application/octet-stream\r\n" \
-        "Accept-Ranges: bytes\r\n" \
-        f"Content-Range: bytes {start_position}-{end_position}/{file_size}\r\n" \
-        f"Content-Length: {end_position - start_position + 1}\r\n" \
-        "Last-Modified: Thu, 01 Jan 1970 00:00:00 GMT\r\n\r\n"
-
-    def get_code_400(self):
-        return "HTTP/1.0 400 invalid range\r\n" \
-        "Server: NXLoader Python\r\n" \
-        f"Date: {self.current_date}\r\n" \
-        "Connection: close\r\n" \
-        "Content-Type: text/html;charset=utf-8\r\n" \
-        "Content-Length: 0\r\n\r\n"
-
-    def get_code_404(self):
-        return "HTTP/1.0 404 Not Found\r\n" \
-        "Server: NXLoader Python\r\n" \
-        f"Date: {self.current_date}\r\n" \
-        "Connection: close\r\n" \
-        "Content-Type: text/html;charset=utf-8\r\n" \
-        "Content-Length: 0\r\n\r\n"
-
-    def get_code_416(self):
-        return "HTTP/1.0 416 Requested Range Not Satisfiable\r\n" \
-        "Server: NXLoader Python\r\n" \
-        f"Date: {self.current_date}\r\n" \
-        "Connection: close\r\n" \
-        "Content-Type: text/html;charset=utf-8\r\n" \
-        "Content-Length: 0\r\n\r\n"
+from io import TextIOWrapper
 
 class SwitchNet(socket.socket):
     def __init__(self, roms: list[str], switch_ip: str, switch_port: int):
@@ -65,6 +17,10 @@ class SwitchNet(socket.socket):
         self.local_ip = self.__get_local_ip()
         # grabbed from ns-usbloader xd
         self.local_port = random.randint(0,999) + 6000
+
+        self.running = True
+
+        self.packets = Packets()
 
         self.logger = logging.getLogger("SwitchNet")
     
@@ -77,10 +33,93 @@ class SwitchNet(socket.socket):
             raise Exception("Couldn't get local ip")
 
     def send_handshake(self):
+        self.logger.info("Initializing handshake with the switch...")
         handshake_data = ""
         for rom in self.roms:
             handshake_data += f"{self.local_ip}:{self.local_port}/{urlencode(rom)}\n"
 
+        handshake_data_size = len(handshake_data)
+
         handshaker = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         handshaker.connect((self.switch_ip, self.switch_port))
 
+        self.logger.debug("Sending handshake size to the switch...")
+        handshaker.sendall(f"{handshake_data_size}\n".encode())
+
+        self.logger.debug("Sending handshake data to the switch...")
+        handshaker.sendall(handshake_data.encode())
+
+        self.logger.info("Switch handshake complete")
+
+        handshaker.close()
+    
+    def requestLoop(self):
+        while self.running:
+            client, addr = self.accept()
+            self.logger.info("New connection from " + str(addr))
+
+            packet = []
+            sock = client.makefile("rw")
+
+            while self.running:
+                data = sock.readline()
+                if data is None:
+                    break
+
+                if data.strip() == "":
+                    self.handleRequest(sock, packet)
+                    packet.clear()
+                    continue
+
+                packet.append(data)
+
+            sock.close()
+            client.close()
+
+        self.close()
+
+    def handleRequest(self, client: TextIOWrapper, packet: list):
+        if packet[0].startswith("DROP"):
+            self.logger.info("Received drop request")
+            self.running = False
+            return
+
+        req_file_name = re.sub(r"(^[A-Za-z\s]+/)|(\s+?.*$)", "", packet[0])
+
+        if req_file_name not in self.roms or os.path.exists(req_file_name) is False:
+            self.logger.error("Received request for non-existent file: " + req_file_name)
+            client.write(self.packets.get_code_404())
+            return
+        
+        rom_size = os.stat(req_file_name).st_size
+        
+        if rom_size < 500:
+            self.logger.error("Received request for invalid file: " + req_file_name)
+            client.write(self.packets.get_code_416())
+            return
+        
+        if packet[0].startswith("HEAD"):
+            self.logger.info("Received HEAD request for " + req_file_name)
+            client.write(self.packets.get_code_200(rom_size))
+            return
+
+        if packet[0].startswith("GET"):
+            for line in packet:
+                if line.startswith("Range: ") is False:
+                    continue
+                
+                range = line.lower().replace("range: bytes=", "").split("-", 2)
+                if range[0] != "" and range[1] != "":
+                    fromRange = int(range[0])
+                    toRange = int(range[1])
+                    if fromRange > toRange or toRange > rom_size:
+                        self.logger.error("Received request for invalid range: " + req_file_name)
+                        client.write(self.packets.get_code_400())
+                        return
+
+                    self.send_file_chunk(client, req_file_name, fromRange, toRange)
+                        
+    def send_file_chunk(self, client: TextIOWrapper, file_name: str, start_position: int, end_position: int):
+        # with open(self.roms[0], "rb") as rom:
+        with open(file_name, "rb") as file:
+            file.seek(start_position)
