@@ -1,2 +1,2 @@
-from net import SwitchNet
+from modules.net import SwitchNet
 

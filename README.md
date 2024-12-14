@@ -10,7 +10,7 @@ Se necesita de un socket servidor con los siguientes parametros `AF_INET` `SOCK_
 static int m_serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 ```
 ## Handshake
-Para realizar el handshake entre dispositivos se necesita de otro socket (no se porque) INET, se conecta a la ip y puerto de la switch (2000). Este socket debe mandar el largo de un string separado por caracteres de newlines (`\n`) en donde este la ip del servidor cliente y el puerto (el puerto puede ser random) y el archivo a mandar a la switch, y luego el string en cuestion:
+Para realizar el handshake entre dispositivos se necesita de otro socket (no se porque) INET, se conecta a la ip y puerto de la switch (2000). Este socket debe mandar el largo de un string separado por caracteres de newlines (`\n`) en donde este la ip del servidor cliente y el puerto (el puerto puede ser random) y el archivo que se mandara a la switch codificado en formato de url`, y luego el string en cuestion:
 ```
 # first send (message length)
 67
@@ -49,11 +49,11 @@ Se utiliza cuando el servidor manda una solicitud `HEAD`.
 ```
 HTTP/1.0 200 OK\r\n
 Server: %EXAMPLE_SERVER%\r\n
-Date: %CURRENT_DATE%\r\n" 
-Content-type: application/octet-stream\r\n" 
-Accept-Ranges: bytes\r\n" 
-Content-Range: bytes 0-%FILE_SIZE_1%/%CONTENT_LENGTH%\r\n" 
-Content-Length: %CONTENT_LENGTH%\r\n" 
+Date: %CURRENT_DATE%\r\n 
+Content-type: application/octet-stream\r\n 
+Accept-Ranges: bytes\r\n 
+Content-Range: bytes 0-%FILE_SIZE_1%/%CONTENT_LENGTH%\r\n 
+Content-Length: %CONTENT_LENGTH%\r\n 
 Last-Modified: Thu, 01 Jan 1970 00:00:00 GMT\r\n\r\n
 ```
 ### CODE_206

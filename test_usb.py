@@ -4,7 +4,7 @@ import datetime
 import tqdm
 
 from pathlib import Path
-from usbInstall import SwitchUsb
+from modules.usbInstall import SwitchUsb
 
 class Handlers:
     def __init__(self):
