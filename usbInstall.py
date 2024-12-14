@@ -20,6 +20,26 @@ FILE_RANGE_PADDED=2
 
 TYPE_RESPONSE=1
 
+class Endpoint:
+    def __init__(self, config, direction):
+        def check_endpoint(direction):
+            return lambda ep: usb.util.endpoint_direction(ep.bEndpointAddress) == direction
+        
+        self.ep: usb.core.Endpoint = usb.util.find_descriptor(config, custom_match=check_endpoint(direction))
+
+        endpoint_str = 'In' if direction == usb.util.ENDPOINT_IN else "Out"
+        self.logger = logging.getLogger(f"{endpoint_str}Endpoint")
+        if self.ep is None:
+            self.logger.error(f"{endpoint_str}Endpoint is none ")
+    
+    def write(self, buff, timeout=2):
+        self.logger.debug(f"Writting to endpoint with length: {len(buff)}")
+        self.ep.write(buff, timeout)
+    
+    def read(self, size_or_buffer, timeout=3):
+        self.logger.debug("Reading from endpoint...")
+        return self.ep.read(size_or_buffer, timeout)
+    
 class SwitchUsb:
     def __init__(self):
         self.dev: usb.core.Device | None = None
@@ -55,22 +75,16 @@ class SwitchUsb:
             raise ValueError("Switch not found")
 
     def __configure_usb(self):
-        def check_endpoint(direction):
-            return lambda ep: usb.util.endpoint_direction(ep.bEndpointAddress) == direction
-        
         self.logger.debug("Configurating device...")
         self.dev.set_configuration()
         self.cfg = self.dev.get_active_configuration()
 
         self.logger.debug("Finding endpoints...")
-        cfg = self.cfg[(0,0)]
-        self.out_ep = usb.util.find_descriptor(cfg, custom_match=check_endpoint(usb.util.ENDPOINT_OUT))
-        self.in_ep = usb.util.find_descriptor(cfg, custom_match=check_endpoint(usb.util.ENDPOINT_IN))
 
-        if self.out_ep is None or self.in_ep is None:
-            self.logger.error("Endpoints are None")
-            raise ValueError("Endpoints are None")
-    
+        cfg = self.cfg[(0,0)]
+        self.out_ep = Endpoint(cfg, usb.util.ENDPOINT_OUT)
+        self.in_ep = Endpoint(cfg, usb.util.ENDPOINT_IN)
+
     def __send_list_header(self, len):
         try:
             self.logger.debug("Sending header with rom list length of %d", len)
@@ -96,15 +110,20 @@ class SwitchUsb:
         usb.util.dispose_resources(self.dev)
     
     def validate_roms(self, roms: list[Path]):
+        result = []
+        roms_length = 0
         for file in roms:
             if file.is_file() is False or file.suffix not in [".nsp", ".xci"]:
                 self.logger.warning(f"{str(file)} is not a valid rom")
                 continue
-            yield str(file) + "\n"
+            result.append(str(file) + "\n")
+            roms_length += len(str(file)) + 1
+
+        return result, roms_length
     
-    def send_roms(self, roms: list[str]):
-        roms_list = self.validate_roms([Path(r) for r in roms])
-        roms_len = sum([len(x) for x in roms_list])
+    def send_roms(self, roms: list[Path]):
+        roms_list, roms_len = self.validate_roms(roms)
+        self.logger.debug(roms_len)
 
         # sends header to awoo installer
         self.__send_list_header(roms_len)
@@ -157,7 +176,7 @@ class SwitchUsb:
                 if padding is True:
                     buf = b'\x00' * PADDING_SIZE + buf
                 
-                self.out_ep.write(data=buf, timeout=0)
+                self.out_ep.write(buf, timeout=0)
                 current_offset += read_size
     
     def poll_commands(self, info_cb=info_cb, prog_cb=progress_cb):

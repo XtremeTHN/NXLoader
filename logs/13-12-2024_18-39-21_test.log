@@ -1,0 +1,12 @@
+18:39:588 SwitchUsb DEBUG Configurating device...
+18:39:599 SwitchUsb DEBUG Finding endpoints...
+18:39:605 SwitchUsb DEBUG 68
+18:39:605 SwitchUsb DEBUG Sending header with rom list length of 68
+18:39:605 OutEndpoint DEBUG Writting to endpoint with length: 4
+18:39:605 OutEndpoint DEBUG Writting to endpoint with length: 4
+18:39:605 OutEndpoint DEBUG Writting to endpoint with length: 8
+18:39:605 OutEndpoint DEBUG Writting to endpoint with length: 19
+18:39:605 OutEndpoint DEBUG Writting to endpoint with length: 36
+18:39:605 OutEndpoint DEBUG Writting to endpoint with length: 13
+18:39:606 InEndpoint DEBUG Reading from endpoint...
+18:39:245 SwitchUsb INFO Exiting

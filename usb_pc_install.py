@@ -113,6 +113,8 @@ def send_nsp_list(nsp_dir, out_ep):
     for nsp_path in [f for f in nsp_dir.iterdir() if f.is_file() and f.suffix == '.nsp']:
         nsp_path_list.append(nsp_path.__str__() + '\n')
         nsp_path_list_len += len(nsp_path.__str__()) + 1
+    
+    print(nsp_path_list_len)
 
     print('Sending header...')
 

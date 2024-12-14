@@ -3,7 +3,7 @@ import os
 import datetime
 import tqdm
 
-from usb import SwitchUsb
+from usbInstall import SwitchUsb
 
 class Handlers:
     def __init__(self):
@@ -23,20 +23,19 @@ def init_log(name, log_dir="logs") -> str | None:
                 format='%(asctime)s:%(msecs)d %(name)s %(levelname)s %(message)s',
                 datefmt='%H:%M',
                 level=logging.DEBUG)
-    console = logging.StreamHandler()
-    console.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('[ %(name)s ][%(levelname)s] %(message)s')
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
-    return [
-        getattr(logging.getLoggerClass().root.handlers[0], 'baseFilename', "Null"),
-        console,
-    ]
+    # console = logging.StreamHandler()
+    # console.setLevel(logging.DEBUG)
+    # formatter = logging.Formatter('[ %(name)s ][%(levelname)s] %(message)s')
+    # console.setFormatter(formatter)
+    # logging.getLogger('').addHandler(console)
 
-print(init_log("test"))
+init_log("test")
 
 usb = SwitchUsb()
 handlers = Handlers()
 
-usb.set_roms_folder("nsp/")
-usb.poll_commands(prog_cb=handlers.progress_cb, info_cb=handlers.info_cb)
+try:
+    usb.send_roms_folder("nsp/")
+    usb.poll_commands(prog_cb=handlers.progress_cb, info_cb=handlers.info_cb)
+finally:
+    usb.dev.reset()
