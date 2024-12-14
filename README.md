@@ -9,6 +9,7 @@ Se necesita de un socket servidor con los siguientes parametros `AF_INET` `SOCK_
 ```c++
 static int m_serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 ```
+## Handshake
 Para realizar el handshake entre dispositivos se necesita de otro socket (no se porque) INET, se conecta a la ip y puerto de la switch (2000). Este socket debe mandar un el largo de un string separado por caracteres de newlines (`\n`) en donde haya informacion del host y el archivo a mandar a la switch, y luego el string en cuestion
 Ejemplo:
 ```
@@ -19,6 +20,8 @@ Ejemplo:
 192.168.0.23:6033/Ori_v103.xci\n192.168.0.23:6033/SMBP_Jamboree.xci\n
 ```
 Este socket su unico proposito es hacer este handshake, asi que se debe cerrar despues de mandar la lista
+
+## ServeLoop
 
 Se entra en un loop infinito en donde el socket servidor debe de aceptar la conexion de la switch, despues se reciben las solicitudes que la switch manda.
 
@@ -32,8 +35,6 @@ String[] rangeStr = rangeDirective.toLowerCase().replaceAll("^range:\\s+?bytes="
 - El nombre del archivo: Si `DROP` no es enviado primero, el nombre del archivo seleccionado en AwooInstaller sera mandado
 
 Los archivos son mandados casi igual que por usb, la switch manda desde donde se desea leer el archivo y espera que se manden los datos.
-
-
 
 ## Solicitudes
 Las solicitudes son cadenas de texto que se puede recibir de la switch, o mandarlo nosotros. Hay algunas variables que son globales para todas las solicitudes:
