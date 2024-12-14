@@ -20,6 +20,17 @@ FILE_RANGE_PADDED=2
 
 TYPE_RESPONSE=1
 
+def retry(func):
+    def wrapper(*args, **kwargs):
+        for _ in range(3):
+            try:
+                result = func(*args, **kwargs)
+                return result
+            except:
+                args[0].logger.exception("Retrying writting...")
+        raise Exception("Ran out of retries")
+    return wrapper
+
 class Endpoint:
     def __init__(self, config, direction):
         def check_endpoint(direction):
@@ -32,11 +43,11 @@ class Endpoint:
         if self.ep is None:
             self.logger.error(f"{endpoint_str}Endpoint is none ")
     
-    def write(self, buff, timeout=2):
+    def write(self, buff, timeout=20):
         self.logger.debug(f"Writting to endpoint with length: {len(buff)}")
         self.ep.write(buff, timeout)
     
-    def read(self, size_or_buffer, timeout=3):
+    def read(self, size_or_buffer, timeout=None):
         self.logger.debug("Reading from endpoint...")
         return self.ep.read(size_or_buffer, timeout)
     
@@ -114,8 +125,10 @@ class SwitchUsb:
         roms_length = 0
         for file in roms:
             if file.is_file() is False or file.suffix not in [".nsp", ".xci"]:
+                self.logger.debug(f"{file.is_file()} {file.suffix}")
                 self.logger.warning(f"{str(file)} is not a valid rom")
                 continue
+            self.logger.debug(f"{file.is_file()} {file.suffix} {file}")
             result.append(str(file) + "\n")
             roms_length += len(str(file)) + 1
 

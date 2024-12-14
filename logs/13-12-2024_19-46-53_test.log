@@ -1,0 +1,145 @@
+19:46:748 SwitchUsb DEBUG Configurating device...
+19:46:759 SwitchUsb DEBUG Finding endpoints...
+19:46:764 SwitchUsb DEBUG True .xci nsp/Ori_v1.2.0.xci
+19:46:764 SwitchUsb DEBUG True .nsp /home/axel/Downloads/homebrew.nsp
+19:46:764 SwitchUsb DEBUG 53
+19:46:764 SwitchUsb DEBUG Sending header with rom list length of 53
+19:46:764 OutEndpoint DEBUG Writting to endpoint with length: 4
+19:46:785 OutEndpoint ERROR Retrying writting...
+Traceback (most recent call last):
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 27, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 49, in write
+    self.ep.write(buff, timeout)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 408, in write
+    return self.device.write(self, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 989, in write
+    return fn(
+           ^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 837, in bulk_write
+    return self.__write(self.lib.libusb_bulk_transfer,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 938, in __write
+    _check(retval)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 110] Operation timed out
+19:46:786 OutEndpoint DEBUG Writting to endpoint with length: 4
+19:46:807 OutEndpoint ERROR Retrying writting...
+Traceback (most recent call last):
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 27, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 49, in write
+    self.ep.write(buff, timeout)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 408, in write
+    return self.device.write(self, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 989, in write
+    return fn(
+           ^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 837, in bulk_write
+    return self.__write(self.lib.libusb_bulk_transfer,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 938, in __write
+    _check(retval)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 110] Operation timed out
+19:46:807 OutEndpoint DEBUG Writting to endpoint with length: 4
+19:46:827 OutEndpoint ERROR Retrying writting...
+Traceback (most recent call last):
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 27, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 49, in write
+    self.ep.write(buff, timeout)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 408, in write
+    return self.device.write(self, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 989, in write
+    return fn(
+           ^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 837, in bulk_write
+    return self.__write(self.lib.libusb_bulk_transfer,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 938, in __write
+    _check(retval)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 110] Operation timed out
+19:46:828 SwitchUsb ERROR Couldn't send header to the switch
+Traceback (most recent call last):
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 104, in __send_list_header
+    self.out_ep.write(b'TUL0')
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 31, in wrapper
+    raise Exception("Ran out of retries")
+Exception: Ran out of retries
+19:46:828 OutEndpoint DEBUG Writting to endpoint with length: 19
+19:46:849 OutEndpoint ERROR Retrying writting...
+Traceback (most recent call last):
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 27, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 49, in write
+    self.ep.write(buff, timeout)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 408, in write
+    return self.device.write(self, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 989, in write
+    return fn(
+           ^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 837, in bulk_write
+    return self.__write(self.lib.libusb_bulk_transfer,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 938, in __write
+    _check(retval)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 110] Operation timed out
+19:46:849 OutEndpoint DEBUG Writting to endpoint with length: 19
+19:46:869 OutEndpoint ERROR Retrying writting...
+Traceback (most recent call last):
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 27, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 49, in write
+    self.ep.write(buff, timeout)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 408, in write
+    return self.device.write(self, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 989, in write
+    return fn(
+           ^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 837, in bulk_write
+    return self.__write(self.lib.libusb_bulk_transfer,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 938, in __write
+    _check(retval)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 110] Operation timed out
+19:46:870 OutEndpoint DEBUG Writting to endpoint with length: 19
+19:46:890 OutEndpoint ERROR Retrying writting...
+Traceback (most recent call last):
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 27, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/usbInstall.py", line 49, in write
+    self.ep.write(buff, timeout)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 408, in write
+    return self.device.write(self, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/core.py", line 989, in write
+    return fn(
+           ^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 837, in bulk_write
+    return self.__write(self.lib.libusb_bulk_transfer,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 938, in __write
+    _check(retval)
+  File "/home/axel/Documents/Projects/SwitchNspInst/.venv/lib/python3.12/site-packages/usb/backend/libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 110] Operation timed out

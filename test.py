@@ -3,6 +3,7 @@ import os
 import datetime
 import tqdm
 
+from pathlib import Path
 from usbInstall import SwitchUsb
 
 class Handlers:
@@ -22,7 +23,7 @@ def init_log(name, log_dir="logs") -> str | None:
                 filemode='w',
                 format='%(asctime)s:%(msecs)d %(name)s %(levelname)s %(message)s',
                 datefmt='%H:%M',
-                level=logging.DEBUG)
+                level=logging.INFO)
     # console = logging.StreamHandler()
     # console.setLevel(logging.DEBUG)
     # formatter = logging.Formatter('[ %(name)s ][%(levelname)s] %(message)s')
@@ -31,11 +32,8 @@ def init_log(name, log_dir="logs") -> str | None:
 
 init_log("test")
 
-usb = SwitchUsb()
 handlers = Handlers()
-
-try:
-    usb.send_roms_folder("nsp/")
+with SwitchUsb() as usb:
+    # usb.send_roms_folder("nsp/")
+    usb.send_roms([Path("nsp/Ori_v1.2.0.xci"), Path("/home/axel/Downloads/homebrew.nsp")])
     usb.poll_commands(prog_cb=handlers.progress_cb, info_cb=handlers.info_cb)
-finally:
-    usb.dev.reset()
