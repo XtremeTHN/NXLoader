@@ -124,12 +124,29 @@ class SwitchNet(socket.socket):
                         self.packets.send_code_400()
                         return
 
-                    self.send_file_chunk(client, req_file_name, rom_size, startRange, endRange)
+                    self.send_file_chunk(req_file_name, rom_size, startRange, endRange)
                     return
                         
-    def send_file_chunk(self, client: TextIOWrapper, file_name: str, rom_size: int, start_position: int, end_position: int):
-        # with open(self.roms[0], "rb") as rom:
-        self.logger.info(f"Sending file chunk of {end_position - start_position} to the switch...")
+    def send_file_chunk(self, file_name: str, rom_size: int, start_position: int, end_position: int):
+        total_bytes = end_position - start_position + 1
+        self.logger.info(f"Sending file chunk of {total_bytes} to the switch...")
         self.packets.send_code_206(start_position, end_position, rom_size)
+
         with open(file_name, "rb") as file:
             file.seek(start_position)
+
+            offset = 0
+            read_piece = 1024
+            while offset < total_bytes:
+                # if the actual block exceds the range, we adjust the read_piece.
+                if offset + read_piece >= total_bytes:
+                    read_piece = total_bytes - offset
+                
+                chunk = file.read(read_piece)
+                chunk_size = len(chunk)
+                if chunk_size < read_piece:
+                    self.logger.error(f"The current chunk size: {chunk_size} is less than the read piece: {read_piece}")
+                    raise IOError("File ended unexpectedly")
+
+                self.packets.send(chunk)
+                offset += read_piece
