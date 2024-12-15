@@ -18,6 +18,7 @@ Para realizar el handshake entre dispositivos se necesita de otro socket (no se 
 # second send
 192.168.0.23:6033/Ori_v103.xci\n192.168.0.23:6033/SMBP_Jamboree.xci\n
 ```
+Nota: el string solo debe contener el nombre del archivo, no puede contener la ruta completa.
 Este socket su unico proposito es hacer este handshake, asi que se debe cerrar despues de mandar la lista
 
 ## ServeLoop
