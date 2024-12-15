@@ -5,7 +5,7 @@ import re
 import os
 
 from modules.net_requests import Packets
-from urllib.parse import urlencode
+from urllib.parse import quote
 from io import TextIOWrapper
 
 class SwitchNet(socket.socket):
@@ -16,17 +16,19 @@ class SwitchNet(socket.socket):
         There isn't so much documentation about the TinUSB and TinNET protocol and i don't understand the source code of Awoo xd
         """
         super().__init__(socket.AF_INET, socket.SOCK_STREAM)
-        self.roms = roms
-        self.switch_ip = switch_ip
-        self.switch_port = switch_port
         self.local_ip = self.__get_local_ip()
         # grabbed from ns-usbloader xd
         self.local_port = random.randint(0,999) + 6000
+        self.bind((self.__get_local_ip(), self.local_port))
+        self.listen(1)
+
+        self.roms = {os.path.basename(rom): rom for rom in roms}
+
+        self.switch_ip = switch_ip
+        self.switch_port = switch_port
 
         self.running = True
-
         self.packets: Packets | None = None
-
         self.logger = logging.getLogger("SwitchNet")
     
     def __get_local_ip(self) -> str:
@@ -41,17 +43,19 @@ class SwitchNet(socket.socket):
         self.logger.info("Initializing handshake with the switch...")
         handshake_data = ""
         for rom in self.roms:
-            handshake_data += f"{self.local_ip}:{self.local_port}/{urlencode(rom)}\n"
+            handshake_data += f"{self.local_ip}:{self.local_port}/{quote(rom)}\n"
 
         handshake_data_size = len(handshake_data)
 
         handshaker = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         handshaker.connect((self.switch_ip, self.switch_port))
 
-        self.logger.debug("Sending handshake size to the switch...")
-        handshaker.sendall(f"{handshake_data_size}\n".encode())
+        self.logger.info("Sending handshake size to the switch...")
+        self.logger.debug("Handshake size: %d", handshake_data_size)
+        handshaker.sendall(handshake_data_size.to_bytes(4, "big"))
 
-        self.logger.debug("Sending handshake data to the switch...")
+        self.logger.info("Sending handshake data to the switch...")
+        self.logger.debug("Handshake data: %s", handshake_data)
         handshaker.sendall(handshake_data.encode())
 
         self.logger.info("Switch handshake complete")
@@ -132,7 +136,8 @@ class SwitchNet(socket.socket):
         self.logger.info(f"Sending file chunk of {total_bytes} to the switch...")
         self.packets.send_code_206(start_position, end_position, rom_size)
 
-        with open(file_name, "rb") as file:
+        rom_path = self.roms[file_name]
+        with open(rom_path, "rb") as file:
             file.seek(start_position)
 
             offset = 0
