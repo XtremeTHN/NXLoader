@@ -10,6 +10,11 @@ from io import TextIOWrapper
 
 class SwitchNet(socket.socket):
     def __init__(self, roms: list[str], switch_ip: str, switch_port: int):
+        """
+        A class for installing roms through internet.
+        It's mostly a port of the code of ns-usbloader xd.
+        There isn't so much documentation about the TinUSB and TinNET protocol and i don't understand the source code of Awoo xd
+        """
         super().__init__(socket.AF_INET, socket.SOCK_STREAM)
         self.roms = roms
         self.switch_ip = switch_ip
@@ -20,7 +25,7 @@ class SwitchNet(socket.socket):
 
         self.running = True
 
-        self.packets = Packets()
+        self.packets: Packets | None = None
 
         self.logger = logging.getLogger("SwitchNet")
     
@@ -60,6 +65,7 @@ class SwitchNet(socket.socket):
 
             packet = []
             sock = client.makefile("rw")
+            self.packets = Packets(sock)
 
             while self.running:
                 data = sock.readline()
@@ -88,19 +94,19 @@ class SwitchNet(socket.socket):
 
         if req_file_name not in self.roms or os.path.exists(req_file_name) is False:
             self.logger.error("Received request for non-existent file: " + req_file_name)
-            client.write(self.packets.get_code_404())
+            self.packets.send_code_404()
             return
         
         rom_size = os.stat(req_file_name).st_size
         
         if rom_size < 500:
             self.logger.error("Received request for invalid file: " + req_file_name)
-            client.write(self.packets.get_code_416())
+            self.packets.send_code_416()
             return
         
         if packet[0].startswith("HEAD"):
             self.logger.info("Received HEAD request for " + req_file_name)
-            client.write(self.packets.get_code_200(rom_size))
+            self.packets.send_code_200(rom_size)
             return
 
         if packet[0].startswith("GET"):
@@ -110,16 +116,20 @@ class SwitchNet(socket.socket):
                 
                 range = line.lower().replace("range: bytes=", "").split("-", 2)
                 if range[0] != "" and range[1] != "":
-                    fromRange = int(range[0])
-                    toRange = int(range[1])
-                    if fromRange > toRange or toRange > rom_size:
+                    startRange = int(range[0])
+                    endRange = int(range[1])
+                    
+                    if startRange > endRange or endRange > rom_size:
                         self.logger.error("Received request for invalid range: " + req_file_name)
-                        client.write(self.packets.get_code_400())
+                        self.packets.send_code_400()
                         return
 
-                    self.send_file_chunk(client, req_file_name, fromRange, toRange)
+                    self.send_file_chunk(client, req_file_name, rom_size, startRange, endRange)
+                    return
                         
-    def send_file_chunk(self, client: TextIOWrapper, file_name: str, start_position: int, end_position: int):
+    def send_file_chunk(self, client: TextIOWrapper, file_name: str, rom_size: int, start_position: int, end_position: int):
         # with open(self.roms[0], "rb") as rom:
+        self.logger.info(f"Sending file chunk of {end_position - start_position} to the switch...")
+        self.packets.send_code_206(start_position, end_position, rom_size)
         with open(file_name, "rb") as file:
             file.seek(start_position)
