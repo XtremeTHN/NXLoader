@@ -4,9 +4,11 @@ import random
 import re
 import os
 
-from modules.net_requests import Packets
+from modules.net_requests import Requests
 from urllib.parse import quote
-from io import TextIOWrapper
+
+import select
+import errno
 
 class SwitchNet(socket.socket):
     def __init__(self, roms: list[str], switch_ip: str, switch_port: int):
@@ -28,7 +30,7 @@ class SwitchNet(socket.socket):
         self.switch_port = switch_port
 
         self.running = True
-        self.packets: Packets | None = None
+        self.requests: Requests | None = None
         self.logger = logging.getLogger("SwitchNet")
     
     def __get_local_ip(self) -> str:
@@ -68,52 +70,49 @@ class SwitchNet(socket.socket):
             self.logger.info("New connection from " + str(addr))
 
             packet = []
-            sock = client.makefile("rw")
-            self.packets = Packets(sock)
+            self.requests = Requests(client)
 
             while self.running:
-                data = sock.readline()
-                if data is None:
-                    break
+                packet = self.requests.read_request()
+                self.handleRequest(packet)
+                packet.clear()
 
-                if data.strip() == "":
-                    self.handleRequest(sock, packet)
-                    packet.clear()
-                    continue
-
-                packet.append(data)
-
-            sock.close()
             client.close()
+            self.requests.close()
 
         self.close()
 
-    def handleRequest(self, client: TextIOWrapper, packet: list):
+    def handleRequest(self, packet: list):
+        if len(packet) == 0:
+            return
+        
         if packet[0].startswith("DROP"):
             self.logger.info("Received drop request")
             self.running = False
             return
-
+        
         req_file_name = re.sub(r"(^[A-Za-z\s]+/)|(\s+?.*$)", "", packet[0])
+        rom = self.roms.get(req_file_name)
 
-        if req_file_name not in self.roms or os.path.exists(req_file_name) is False:
-            self.logger.error("Received request for non-existent file: " + req_file_name)
-            self.packets.send_code_404()
+        if req_file_name not in self.roms or os.path.exists(rom) is False:
+            self.logger.error("Received request for invalid file: " + req_file_name)
+            self.requests.send_code_404()
             return
         
-        rom_size = os.stat(req_file_name).st_size
+        rom_size = os.stat(rom).st_size
         
         if rom_size < 500:
-            self.logger.error("Received request for invalid file: " + req_file_name)
-            self.packets.send_code_416()
+            self.logger.error("Received request for invalid file: " + rom)
+            self.requests.send_code_416()
             return
         
         if packet[0].startswith("HEAD"):
-            self.logger.info("Received HEAD request for " + req_file_name)
-            self.packets.send_code_200(rom_size)
+            self.logger.info("Received HEAD request for " + rom)
+            self.requests.send_code_200(rom_size)
             return
 
         if packet[0].startswith("GET"):
+            self.logger.info("Received GET request for " + rom)
             for line in packet:
                 if line.startswith("Range: ") is False:
                     continue
@@ -124,20 +123,20 @@ class SwitchNet(socket.socket):
                     endRange = int(range[1])
                     
                     if startRange > endRange or endRange > rom_size:
-                        self.logger.error("Received request for invalid range: " + req_file_name)
-                        self.packets.send_code_400()
+                        self.logger.error("Received request for invalid range: " + rom)
+                        self.requests.send_code_400()
                         return
 
-                    self.send_file_chunk(req_file_name, rom_size, startRange, endRange)
+                    self.send_file_chunk(rom, rom_size, startRange, endRange)
                     return
                         
     def send_file_chunk(self, file_name: str, rom_size: int, start_position: int, end_position: int):
         total_bytes = end_position - start_position + 1
         self.logger.info(f"Sending file chunk of {total_bytes} to the switch...")
-        self.packets.send_code_206(start_position, end_position, rom_size)
+        self.requests.send_code_206(start_position, end_position, rom_size)
+        self.requests.flush()
 
-        rom_path = self.roms[file_name]
-        with open(rom_path, "rb") as file:
+        with open(file_name, "rb") as file:
             file.seek(start_position)
 
             offset = 0
@@ -147,11 +146,15 @@ class SwitchNet(socket.socket):
                 if offset + read_piece >= total_bytes:
                     read_piece = total_bytes - offset
                 
+                
                 chunk = file.read(read_piece)
                 chunk_size = len(chunk)
                 if chunk_size < read_piece:
                     self.logger.error(f"The current chunk size: {chunk_size} is less than the read piece: {read_piece}")
                     raise IOError("File ended unexpectedly")
 
-                self.packets.send(chunk)
+                self.requests.send(chunk)
                 offset += read_piece
+        self.logger.info("File chunk sent to the switch")
+        self.requests.flush()
+        self.requests.send("asd")
