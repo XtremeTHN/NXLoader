@@ -24,9 +24,10 @@ gnome.compile_resources('nxloader',
 )
 
 python = import('python')
+python_i = python.find_installation('python3', modules: ['pyusb'])
 
 conf = configuration_data()
-conf.set('PYTHON', python.find_installation('python3').full_path())
+conf.set('PYTHON', python_i.full_path())
 conf.set('VERSION', meson.project_version())
 conf.set('localedir', get_option('prefix') / get_option('localedir'))
 conf.set('pkgdatadir', pkgdatadir)
@@ -43,7 +44,8 @@ configure_file(
 nxloader_sources = [
   '__init__.py',
   'main.py',
-  'window.py',
+  'modules/usbInstall.py',
+  'modules/window.py',
 ]
 
 install_data(nxloader_sources, install_dir: moduledir)

@@ -24,7 +24,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw
-from .window import NxloaderWindow
+from .modules.window import NxloaderWindow
 
 
 class NxloaderApplication(Adw.Application):

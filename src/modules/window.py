@@ -19,6 +19,7 @@
 
 from gi.repository import Adw
 from gi.repository import Gtk, Gio
+from gi.repository import GUdev
 
 @Gtk.Template(resource_path='/com/github/XtremeTHN/NXLoader/window.ui')
 class NxloaderWindow(Adw.ApplicationWindow):
@@ -37,3 +38,8 @@ class NxloaderWindow(Adw.ApplicationWindow):
         self.navigation.push_by_tag("main-page")
         self.settings.set_boolean("first-time", False)
 
+    def search_switch(self):
+        def on_device_event(self):
+            ...
+        udev = GUdev.Client()
+        udev.connect("uevent")
