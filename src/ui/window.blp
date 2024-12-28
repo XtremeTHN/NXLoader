@@ -1,0 +1,44 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $NXLoaderWindow : Adw.ApplicationWindow {
+  content: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.NavigationView navigation {
+      Adw.NavigationPage {
+        title: "Welcome";
+        tag: "welcome-page";
+        child: Adw.StatusPage {
+          icon-name: "switch-symbolic";
+          title: "NXLoader";
+          description: "A program made for facilitating the installation of nintendo switch roms through usb";
+          child: Adw.Clamp {
+            maximum-size: 50;
+            child: Gtk.Button {
+              styles [
+                "pill",
+                "suggested-action"
+              ]
+
+              clicked => $get_started_clicked();
+              label: "Get started";
+            };
+          };
+        };
+      }
+
+      Adw.NavigationPage {
+        title: "NXLoader";
+        tag: "main-page";
+
+        child: Adw.StatusPage {
+          icon-name: "drive-harddisk-usb-symbolic";
+          title: "Switch not found";
+          description: "Connect your switch to your pc through usb";
+        };
+      }
+    };
+  };
+}

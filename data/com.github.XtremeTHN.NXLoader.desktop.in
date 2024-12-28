@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=nxloader
+Exec=nxloader
+Icon=com.github.XtremeTHN.NXLoader
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=GTK;
+StartupNotify=true
+DBusActivatable=true

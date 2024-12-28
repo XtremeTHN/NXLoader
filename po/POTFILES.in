@@ -1,0 +1,8 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
+data/com.github.XtremeTHN.NXLoader.desktop.in
+data/com.github.XtremeTHN.NXLoader.metainfo.xml.in
+data/com.github.XtremeTHN.NXLoader.gschema.xml
+src/main.py
+src/window.py
+src/window.ui
