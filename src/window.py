@@ -19,7 +19,8 @@
 
 from gi.repository import Adw
 from gi.repository import Gtk, Gio
-from gi.repository import GUdev
+from .usbInstall import SwitchUsb
+
 
 @Gtk.Template(resource_path='/com/github/XtremeTHN/NXLoader/window.ui')
 class NxloaderWindow(Adw.ApplicationWindow):
@@ -32,14 +33,18 @@ class NxloaderWindow(Adw.ApplicationWindow):
 
         if self.settings.get_boolean("first-time") is False:
             self.navigation.push_by_tag("main-page")
+        
+            self.search_switch()
 
     @Gtk.Template.Callback()
     def get_started_clicked(self, btt):
         self.navigation.push_by_tag("main-page")
         self.settings.set_boolean("first-time", False)
+        self.search_switch()
+
+    def show_control(self):
+        ...
 
     def search_switch(self):
-        def on_device_event(self):
-            ...
-        udev = GUdev.Client()
-        udev.connect("uevent")
+        switch = SwitchUsb()
+        switch.connect("connected", self.show_control)

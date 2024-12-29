@@ -20,12 +20,12 @@
 import sys
 import gi
 
+gi.require_version('GUdev', '1.0')
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw
-from .modules.window import NxloaderWindow
-
+from .window import NxloaderWindow
 
 class NxloaderApplication(Adw.Application):
     """The main application singleton class."""
