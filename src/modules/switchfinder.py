@@ -22,8 +22,17 @@ class SwitchFinder(GObject.GObject):
         self.client = GUdev.Client.new(["usb/usb_interface"])
         self.client.connect('uevent', self.__create_obj)
 
-    def __create_obj(self, _, action: str, __):
+    def __create_obj(self, _, action: str, device: GUdev.Device):
         if action == "add":
+            # Check if this device is a nintendo switch
+            if device.get_property("ID_VENDOR_FROM_DATABASE") != "Nintendo Co.":
+                return
+            if (p:=device.get_property("PRODUCT")) is not None:
+                if len(p) < 2:
+                    return
+                if p.split("/")[1] != "3000":
+                    return
+                
             sw = self.protocol.find_switch()
             self.protocol.set_switch(sw)
             self.emit("connected")
