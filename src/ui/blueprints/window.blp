@@ -1,0 +1,8 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $NXLoaderWindow : Adw.ApplicationWindow {
+  content: Adw.ToastOverlay toast {
+    child: Adw.NavigationView navigation {};
+  };
+}

@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/github/XtremeTHN/NXLoader">
-    <file preprocess="xml-stripblanks" alias="window.ui">ui/window.ui</file>
+    <file preprocess="xml-stripblanks" alias="window.ui">ui/blueprints/window.ui</file>
+    <file preprocess="xml-stripblanks" alias="dialog.ui">ui/blueprints/dialog.ui</file>
+    <file preprocess="xml-stripblanks" alias="rom.ui">ui/blueprints/rom.ui</file>
+    <file preprocess="xml-stripblanks" alias="roms_page.ui">ui/blueprints/roms_page.ui</file>
+    <file preprocess="xml-stripblanks" alias="not_found_page.ui">ui/blueprints/not_found_page.ui</file>
   </gresource>
 
   <gresource prefix="/com/github/XtremeTHN/NXLoader/icons/scalable/actions/">
     <file preprocess="xml-stripblanks" alias="switch-symbolic.svg">ui/icons/switch-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="plus-large-symbolic.svg">ui/icons/plus-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="drive-harddisk-usb-symbolic.svg">ui/icons/drive-harddisk-usb-symbolic.svg</file>
   </gresource>
 </gresources>

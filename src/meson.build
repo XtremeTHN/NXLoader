@@ -3,7 +3,11 @@ moduledir = pkgdatadir / 'nxloader'
 gnome = import('gnome')
 
 blueprints = files(
-	'ui/window.blp'
+	'ui/blueprints/window.blp',
+  'ui/blueprints/dialog.blp',
+  'ui/blueprints/not_found_page.blp',
+  'ui/blueprints/rom.blp',
+  'ui/blueprints/roms_page.blp',
 )
 
 gnome.compile_resources('nxloader',
@@ -13,18 +17,18 @@ gnome.compile_resources('nxloader',
     input: blueprints,
     output: '.',
     command: [
-	find_program('blueprint-compiler'),
-	'batch-compile',
-	'@OUTPUT@',
-	'@CURRENT_SOURCE_DIR@',
-	'@INPUT@'
+      find_program('blueprint-compiler'),
+      'batch-compile',
+      '@OUTPUT@',
+      '@CURRENT_SOURCE_DIR@',
+      '@INPUT@'
     ]),
   install: true,
   install_dir: pkgdatadir,
 )
 
 python = import('python')
-python_i = python.find_installation('python3', modules: ['pyudev'])
+python_i = python.find_installation('python3', modules: ['usb', 'gi'])
 
 conf = configuration_data()
 conf.set('PYTHON', python_i.full_path())
@@ -44,8 +48,9 @@ configure_file(
 nxloader_sources = [
   '__init__.py',
   'main.py',
-  'window.py',
-  'usbInstall.py'
 ]
 
 install_data(nxloader_sources, install_dir: moduledir)
+
+subdir('modules')
+subdir('ui')

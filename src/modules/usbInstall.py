@@ -1,15 +1,10 @@
 import usb.core
 import usb.util
-
+import logging
 import os
 
 from struct import unpack, pack
-from threading import Thread
 from pathlib import Path
-
-from gi.repository import Gio, GObject
-
-import logging
 
 def info_cb(magic: bytes, cmd_type: int, cmd_id: int, data_size: int):
     print("Magic:", magic.decode())
@@ -22,26 +17,6 @@ FILE_RANGE=1
 FILE_RANGE_PADDED=2
 
 TYPE_RESPONSE=1
-
-class FindUsb(Thread, GObject.GObject):
-    __gsignals__ = {
-        "switch-found": (GObject.SIGNAL_RUN_FIRST, None, tuple())
-    }
-    def __init__(self, cancellable=None):
-        Thread.__init__(self)
-        GObject.GObject.__init__(self)
-        self.cancellable = cancellable or Gio.Cancellable.new()
-        self.switch = None
-    
-    def get_switch(self):
-        return self.switch
-    
-    def run(self):
-        while self.cancellable.is_cancelled() is False:
-            dev = usb.core.find(idVendor=0x057E, idProduct=0x3000)
-            
-            if dev is not None:
-                self.switch = dev
 
 class Endpoint:
     def __init__(self, config, direction):
@@ -63,19 +38,13 @@ class Endpoint:
         self.logger.debug("Reading from endpoint...")
         return self.ep.read(size_or_buffer, timeout)
     
-class SwitchUsb(GObject.GObject):
+class SwitchUsb():
     def __init__(self):
         self.dev: usb.core.Device | None = None
         self.out_ep: usb.core.Endpoint | None = None
         self.in_ep: usb.core.Endpoint | None = None
 
-        self.cfg = None
         self.logger = logging.getLogger("SwitchUsb")
-
-        self.__is_connected = False
-
-        self.__find_switch()
-        self.__configure_usb()
 
     def __enter__(self):
         """Init
@@ -90,32 +59,23 @@ class SwitchUsb(GObject.GObject):
         print(args)
         self.close()
 
-    @GObject.Property(type=bool)
-    def connected(self):
-        return self.__is_connected
-
     def set_switch(self, switch: usb.Device):
         self.dev = switch
-        self.__is_connected = True
-        self.notify("connected")
         self.__configure_usb()
 
-    def __find_switch(self):
-        def set_sw(finder):
-            self.set_switch(finder.get_switch())
-
-        finder = FindUsb()
-        finder.connect("switch-found", set_sw)
-        finder.start()
+    def find_switch(self):
+        dev = usb.core.find(idVendor=0x057E, idProduct=0x3000)
+        
+        if dev is not None:
+            return dev
 
     def __configure_usb(self):
         self.logger.debug("Configurating device...")
         self.dev.set_configuration()
-        self.cfg = self.dev.get_active_configuration()
+        cfg = self.dev.get_active_configuration()[(0,0)]
 
         self.logger.debug("Finding endpoints...")
 
-        cfg = self.cfg[(0,0)]
         self.out_ep = Endpoint(cfg, usb.util.ENDPOINT_OUT)
         self.in_ep = Endpoint(cfg, usb.util.ENDPOINT_IN)
 
@@ -140,8 +100,12 @@ class SwitchUsb(GObject.GObject):
         self.out_ep.write(b'\x00' * 0xC)
 
     def close(self):
-        self.dev.reset()
-        usb.util.dispose_resources(self.dev)
+        if self.dev is not None:
+            try:
+                self.dev.reset()
+            except:
+                pass
+            usb.util.dispose_resources(self.dev)
     
     def validate_roms(self, roms: list[Path]):
         result = []

@@ -1,0 +1,47 @@
+using Gtk 4.0;
+
+template $Rom : Gtk.Box {
+  styles [
+    "card"
+  ]
+  orientation: vertical;
+  Gtk.Box {
+    styles [
+      "rom"
+    ]
+    spacing: 30;
+    Gtk.Box {
+      orientation: vertical;
+      Gtk.Label rom_title {
+        styles [
+          "title-3"
+        ]
+        label: "Ori_and_the_Will_of_the_Wisps";
+      }
+      Gtk.Label rom_format {
+        halign: start;
+        label: "Format: xci";
+      }
+      Gtk.Label rom_size {
+        halign: start;
+        label: "Size: 6.1gb";
+      }
+    }
+  
+    Gtk.Button {
+      valign: center;
+      halign: center;
+      icon-name: "user-trash-symbolic";
+      clicked => $remove_rom();
+    }
+  }
+  
+  Gtk.ProgressBar rom_progress {
+    styles [
+      "osd",
+    ]
+    margin-start: 9;
+    margin-end: 10;
+    fraction: 0.7;
+  }
+}

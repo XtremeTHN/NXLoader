@@ -1,0 +1,57 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $RomsPage : Adw.NavigationPage {
+    title: "NXLoader";
+    tag: "roms-page";
+    child: Adw.ToolbarView {
+        top-bar-style: raised;
+
+        [top]
+        Adw.HeaderBar {
+            [end]
+            Gtk.Button {
+              icon-name: "plus-large-symbolic";
+            }
+        }
+
+        [bottom]
+        Gtk.Box {
+            margin-top: 10;
+            margin-bottom: 10;
+            margin-end: 10;
+            margin-start: 10;
+
+            spacing: 10;
+
+            Gtk.Button {
+              hexpand: true;
+              label: "Upload to switch";
+              clicked => $upload_roms();
+            }
+            Gtk.Button {
+              hexpand: true;
+              label: "Clear rom list";
+              clicked => $clear_rom_list();
+            }
+        }
+
+        content: Gtk.Box roms_box {
+          Adw.StatusPage no_roms_status_page {
+            hexpand: true;
+            title: "No rooms";
+            description: "You need to add files with extension .nsp or .xci.";
+            child: Adw.Clamp {
+            maximum-size: 150;
+            child: Gtk.Button {
+                styles [
+                    "suggested-action",
+                    "pill"
+                ]
+                label: "Add a rom";
+            };
+          };
+        }
+      };
+    };
+}
