@@ -25,7 +25,7 @@ class SwitchFinder(GObject.GObject):
     def __create_obj(self, _, action: str, device: GUdev.Device):
         if action == "add":
             # Check if this device is a nintendo switch
-            if device.get_property("ID_VENDOR_FROM_DATABASE") != "Nintendo Co.":
+            if device.get_property("ID_VENDOR_FROM_DATABASE") != "Nintendo Co., Ltd":
                 return
             if (p:=device.get_property("PRODUCT")) is not None:
                 if len(p) < 2:
