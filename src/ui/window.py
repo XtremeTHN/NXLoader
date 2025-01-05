@@ -36,7 +36,6 @@ class NxloaderWindow(Adw.ApplicationWindow):
 
     def __init__(self, app):
         super().__init__(application=app)
-        print("Ad")
         self.settings = Gio.Settings.new("com.github.XtremeTHN.NXLoader")
 
         self.finder = SwitchFinder()
