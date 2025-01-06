@@ -9,3 +9,5 @@ class GetStartedDialog(Adw.Dialog):
     @Gtk.Template.Callback()
     def get_started_clicked(self, _):
         self.close()
+
+# @Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/upload-confirmation.ui")

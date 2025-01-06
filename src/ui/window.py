@@ -22,7 +22,7 @@ from gi.repository import Gtk, Gio, GObject
 from gi.repository import GUdev
 
 from ..modules.switchfinder import SwitchFinder
-from .get_started_dialog import GetStartedDialog
+from .dialogs import GetStartedDialog
 
 from .roms_page import RomsPage
 from .not_found import NotFoundPage

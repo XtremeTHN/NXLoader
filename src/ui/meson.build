@@ -3,7 +3,7 @@ moduledir = pkgdatadir / 'nxloader' / 'ui'
 
 ui_sources = [
     '__init__.py',
-    'get_started_dialog.py',
+    'dialog.py',
     'not_found.py',
     'roms_page.py',
     'window.py'
