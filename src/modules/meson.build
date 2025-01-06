@@ -4,7 +4,8 @@ moduledir = pkgdatadir / 'nxloader' / 'modules'
 modules_sources = [
     '__init__.py',
     'switchfinder.py',
-    'usbInstall.py'
+    'usbInstall.py',
+    'glist.py'
 ]
 
 install_data(modules_sources, install_dir: moduledir)

@@ -27,10 +27,13 @@ class SwitchFinder(GObject.GObject):
             # Check if this device is a nintendo switch
             if device.get_property("ID_VENDOR_FROM_DATABASE") != "Nintendo Co., Ltd":
                 return
+            
+            # PRODUCT is something like this: 57e/3000/100
             if (p:=device.get_property("PRODUCT")) is not None:
+                p = p.split("/")
                 if len(p) < 2:
                     return
-                if p.split("/")[1] != "3000":
+                if p[1] != "3000":
                     return
                 
             sw = self.protocol.find_switch()

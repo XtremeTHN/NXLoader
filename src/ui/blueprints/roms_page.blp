@@ -12,6 +12,7 @@ template $RomsPage : Adw.NavigationPage {
             [end]
             Gtk.Button {
               icon-name: "plus-large-symbolic";
+              clicked => $add_rom();
             }
         }
 
@@ -24,34 +25,30 @@ template $RomsPage : Adw.NavigationPage {
 
             spacing: 10;
 
-            Gtk.Button {
+            Gtk.Button upload_btt {
               hexpand: true;
               label: "Upload to switch";
               clicked => $upload_roms();
             }
-            Gtk.Button {
+            Gtk.Button clear_btt {
               hexpand: true;
               label: "Clear rom list";
               clicked => $clear_rom_list();
             }
         }
 
-        content: Gtk.Box roms_box {
-          Adw.StatusPage no_roms_status_page {
-            hexpand: true;
-            title: "No rooms";
-            description: "You need to add files with extension .nsp or .xci.";
-            child: Adw.Clamp {
-            maximum-size: 150;
-            child: Gtk.Button {
-                styles [
-                    "suggested-action",
-                    "pill"
-                ]
-                label: "Add a rom";
-            };
+        content: Gtk.ScrolledWindow { 
+          child: Gtk.Box roms_box {
+            margin-top: 10;
+            orientation: vertical;
+            spacing: 10;
+            Adw.StatusPage no_roms_status_page {
+              hexpand: true;
+              vexpand: true;
+              title: "No rooms";
+              description: "Add roms through the plus button above. You need to add files with extension .nsp or .xci.";
+            }
           };
-        }
-      };
+        };
     };
 }

@@ -19,4 +19,4 @@ if os.path.exists("build") is False or (r:="-r" in sys.argv) is True:
     exec(args, stdout=QUIET)
 
 exec(["meson", "install"], cwd="build", stdout=QUIET)
-exec(["./installation/bin/nxloader"], stdout=QUIET)
+exec(["./installation/bin/nxloader"])

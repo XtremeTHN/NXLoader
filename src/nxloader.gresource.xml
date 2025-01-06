@@ -6,6 +6,8 @@
     <file preprocess="xml-stripblanks" alias="rom.ui">ui/blueprints/rom.ui</file>
     <file preprocess="xml-stripblanks" alias="roms_page.ui">ui/blueprints/roms_page.ui</file>
     <file preprocess="xml-stripblanks" alias="not_found_page.ui">ui/blueprints/not_found_page.ui</file>
+
+    <file alias="style.css">ui/style.css</file>
   </gresource>
 
   <gresource prefix="/com/github/XtremeTHN/NXLoader/icons/scalable/actions/">

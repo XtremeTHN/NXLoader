@@ -1,47 +1,57 @@
 using Gtk 4.0;
-
-template $Rom : Gtk.Box {
-  styles [
-    "card"
-  ]
-  orientation: vertical;
-  Gtk.Box {
-    styles [
-      "rom"
-    ]
-    spacing: 30;
-    Gtk.Box {
+using Adw 1;
+template $Rom : Adw.Bin {
+  child: Adw.Clamp {
+    child: Gtk.Box {
+      styles [
+        "card"
+      ]
       orientation: vertical;
-      Gtk.Label rom_title {
-        styles [
-          "title-3"
-        ]
-        label: "Ori_and_the_Will_of_the_Wisps";
+      hexpand: true;
+      vexpand: false;
+      
+      valign: start;
+      Gtk.Box {
+        margin-top: 10;
+        margin-bottom: 10;
+        margin-start: 10;
+        margin-end: 10;
+        spacing: 30;
+        Gtk.Box {
+          orientation: vertical;
+          hexpand: true;
+          Gtk.Label rom_title {
+            styles [
+              "title-4"
+            ]
+            halign: start;
+          }
+          Gtk.Label rom_format {
+            halign: start;
+          }
+          Gtk.Label rom_size {
+            halign: start;
+          }
+        }
+      
+        Gtk.Button {
+          valign: center;
+          halign: end;
+          icon-name: "user-trash-symbolic";
+          clicked => $remove_rom();
+        }
       }
-      Gtk.Label rom_format {
-        halign: start;
-        label: "Format: xci";
+      Gtk.Revealer {
+        reveal-child: false;
+        transition-duration: 500;
+        child: Gtk.ProgressBar rom_progress {
+          styles [
+            "merged"
+          ]
+          margin-start: 1;
+          margin-end: 1;
+        };
       }
-      Gtk.Label rom_size {
-        halign: start;
-        label: "Size: 6.1gb";
-      }
-    }
-  
-    Gtk.Button {
-      valign: center;
-      halign: center;
-      icon-name: "user-trash-symbolic";
-      clicked => $remove_rom();
-    }
-  }
-  
-  Gtk.ProgressBar rom_progress {
-    styles [
-      "osd",
-    ]
-    margin-start: 9;
-    margin-end: 10;
-    fraction: 0.7;
-  }
+    };
+  };
 }
