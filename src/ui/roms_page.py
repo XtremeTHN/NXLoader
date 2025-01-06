@@ -39,7 +39,7 @@ class RomItem(Adw.Bin):
     def set_progress(self, prog):
         ...
 
-@Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/roms_page.ui")
+@Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/roms-page.ui")
 class RomsPage(Adw.NavigationPage):
     __gtype_name__ = "RomsPage"
 

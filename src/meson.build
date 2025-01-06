@@ -4,10 +4,10 @@ gnome = import('gnome')
 
 blueprints = files(
 	'ui/blueprints/window.blp',
-  'ui/blueprints/dialog.blp',
-  'ui/blueprints/not_found_page.blp',
+  'ui/blueprints/get-started-dialog.blp',
+  'ui/blueprints/not-found-page.blp',
   'ui/blueprints/rom.blp',
-  'ui/blueprints/roms_page.blp',
+  'ui/blueprints/roms-page.blp',
 )
 
 gnome.compile_resources('nxloader',
