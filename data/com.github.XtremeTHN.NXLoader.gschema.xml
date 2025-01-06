@@ -6,5 +6,11 @@
 	    <description>If this is the first time that the user opens the app</description>
 	    <summary>Is first time launch</summary>
 	  </key>
+
+	  <key name="show-upload-alert">
+	  	<default>true</default>
+		<description>If the upload alert should be displayed</description>
+		<summary>Show alert</summary>
+	  </key>
 	</schema>
 </schemalist>
