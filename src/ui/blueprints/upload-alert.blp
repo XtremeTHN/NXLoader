@@ -1,0 +1,19 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $UploadAlert : Adw.AlertDialog {
+  heading: "Warning";
+  body: "Transferring ROMs via USB can lead to minor erros. If you encounter an error, try transferring again";
+
+  close-response: "cancel";
+
+  extra-child: Gtk.CheckButton {
+    label: "Do not show again";
+    toggled => $do_not_show_again();
+  };
+
+  responses [
+    ok: "Ok" suggested,
+    cancel: "Cancel"
+  ]
+}

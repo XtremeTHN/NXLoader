@@ -8,6 +8,7 @@ blueprints = files(
   'ui/blueprints/not-found-page.blp',
   'ui/blueprints/rom.blp',
   'ui/blueprints/roms-page.blp',
+  'ui/blueprints/upload-alert.blp'
 )
 
 gnome.compile_resources('nxloader',
