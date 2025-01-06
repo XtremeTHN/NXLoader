@@ -1,8 +1,12 @@
 from gi.repository import Gtk, Adw, Gio, GLib
 from ..modules.usbInstall import SwitchUsb
 from ..modules.glist import List
+from ..modules.task import Task, CTask
 
 import os
+
+def idle(func, *args):
+    GLib.idle_add(func, *args)
 
 @Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/rom.ui")
 class RomItem(Adw.Bin):
@@ -69,7 +73,12 @@ class RomsPage(Adw.NavigationPage):
 
     @Gtk.Template.Callback()
     def clear_rom_list(self, _):
-        ...
+        self.__clear_rom_list()
+    
+    @Task
+    def __clear_rom_list(self):
+        for r in self.roms:
+            idle(self.delete_rom_item, r)
     
     def delete_rom_item(self, item):
         self.roms_box.remove(item)
@@ -95,17 +104,22 @@ class RomsPage(Adw.NavigationPage):
 
         dialog.open(self.window, callback=self.__add_rom_cb)
     
+    def __check_if_rom_is_added(self, file, cb):
+        for r in self.roms:
+            if r.get_rom_path() == file.get_path():
+                self.window.add_toast("Rom already added")
+                return
+        cb()
+    
     def __add_rom_cb(self, dialog: Gtk.FileDialog, result):
         try:
             file = dialog.open_finish(result)
         except:
             return
         
-        # idk if this will be too slow
-        for r in self.roms:
-            if r.get_rom_path() == file.get_path():
-                self.window.add_toast("Rom already added")
-                return
+        def add():
+            nonlocal file
+            item = RomItem(file, self.delete_rom_item)
+            idle(self.append_rom_to_box, item)
         
-        item = RomItem(file, self.delete_rom_item)
-        self.append_rom_to_box(item)
+        CTask(self.__check_if_rom_is_added, fn_args=[file, add]).start()

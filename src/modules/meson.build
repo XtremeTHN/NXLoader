@@ -5,7 +5,8 @@ modules_sources = [
     '__init__.py',
     'switchfinder.py',
     'usbInstall.py',
-    'glist.py'
+    'glist.py',
+    'task.py'
 ]
 
 install_data(modules_sources, install_dir: moduledir)
