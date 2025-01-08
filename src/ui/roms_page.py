@@ -149,6 +149,8 @@ class RomsPage(Adw.NavigationPage):
         if self.window.settings.get_boolean("show-upload-alert") is True:
             dialog = UploadAlert(self.window.settings)
             dialog.choose(self.window, None, alert_cb)
+        else:
+            self.__upload_roms()
 
     def __upload_roms(self):
         self.protocol.send_roms([x.get_rom_path() for x in self.roms])

@@ -22,4 +22,4 @@ class UploadAlert(Adw.AlertDialog):
         self.check_btt.connect("toggled", self.do_not_show_again)
 
     def do_not_show_again(self, check: Gtk.CheckButton):
-        self.settings.set_boolean("show-upload-alert", check.get_active() is True)
+        self.settings.set_boolean("show-upload-alert", check.get_active() is False)
