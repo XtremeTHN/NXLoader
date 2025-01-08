@@ -5,7 +5,7 @@ import os
 
 from struct import unpack, pack
 
-from .task import Task
+from .task import task
 from gi.repository import GObject, Gio
 
 EXIT=0
@@ -37,7 +37,9 @@ class Endpoint:
 class SwitchUsb(GObject.GObject):
     __gsignals__ = {
         "send": (GObject.SIGNAL_RUN_FIRST, None, (str, int)),
-        "info": (GObject.SIGNAL_RUN_FIRST, None, (str,))
+        "info": (GObject.SIGNAL_RUN_FIRST, None, (str,)),
+        "start": (GObject.SIGNAL_RUN_FIRST, None, tuple()),
+        "exit": (GObject.SIGNAL_RUN_FIRST, None, tuple())
     }
     def __init__(self):
         super().__init__()
@@ -123,7 +125,7 @@ class SwitchUsb(GObject.GObject):
 
         return result, roms_length
     
-    @Task()
+    @task
     def send_roms(self, roms: list[str]):
         if self.dev is None:
             raise ValueError("Switch device is none")
@@ -180,8 +182,9 @@ class SwitchUsb(GObject.GObject):
                 self.out_ep.write(buf, timeout=0)
                 current_offset += read_size
     
-    @Task()
+    @task
     def poll_commands(self):
+        self.emit("start")
         while self.cancellable.is_cancelled() is False:
             self.emit("info", "Waiting for command...")
 
@@ -192,13 +195,10 @@ class SwitchUsb(GObject.GObject):
                 continue
             
             cmd_id = unpack("<I", cmd_header[8:12])[0]
-            # cmd_type = unpack('<B', cmd_header[4:5])[0]
-            # data_size = unpack('<Q', cmd_header[12:20])[0]
-
-            # info_cb(magic, cmd_type, cmd_id, data_size)
             
             if cmd_id == EXIT:
                 self.emit("info", "Exit recieved")
+                self.emit("exit")
                 self.logger.info('Exiting')
                 break
             elif cmd_id in [FILE_RANGE, FILE_RANGE_PADDED]:

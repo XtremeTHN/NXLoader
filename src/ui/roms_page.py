@@ -1,7 +1,7 @@
 from gi.repository import Gtk, Adw, Gio, GLib
 from ..modules.usbInstall import SwitchUsb
 from ..modules.glist import List
-from ..modules.task import Task, CallbackTask, RepeatTask
+from ..modules.task import task, CallbackTask, RepeatTask
 
 from .dialogs import UploadAlert
 
@@ -54,13 +54,15 @@ class RomItem(Adw.Bin):
         idle(self.rom_progress.set_fraction, self.current_progress / self.size)
     
 class TransferProtocolFunctions:
-    def __init__(self, roms: list[RomItem], total_progress: Gtk.ProgressBar, prog_label: Gtk.Label):
+    def __init__(self, roms: list[RomItem], revealer: Gtk.Revealer, total_progress: Gtk.ProgressBar, prog_label: Gtk.Label):
         self.roms: dict[str, RomItem] = {}
 
         self.prog_label = prog_label
         self.total_progress = total_progress
         self.total_progress_current = 0
         self.total_progress_max = 0
+
+        self.revealer = revealer
 
         self.pulse_task = RepeatTask(self.pulse_progress)
 
@@ -86,6 +88,12 @@ class TransferProtocolFunctions:
         item.update_progress(read_size)
         self.update_total_progress(read_size)
     
+    def on_start(self, _):
+        self.revealer.set_reveal_child(True)
+    
+    def on_exit(self, _):
+        self.revealer.set_reveal_child(False)
+    
     def update_total_progress(self, progress):
         self.total_progress_current += progress
         idle(self.total_progress.set_fraction, self.total_progress_current / self.total_progress_max)
@@ -93,6 +101,8 @@ class TransferProtocolFunctions:
     def connect_functions(self, protocol):
         protocol.connect("info", self.set_info)
         protocol.connect("send", self.update_prog)
+        protocol.connect("start", self.on_start)
+        protocol.connect("exit", self.on_exit)
 
 @Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/roms-page.ui")
 class RomsPage(Adw.NavigationPage):
@@ -104,6 +114,7 @@ class RomsPage(Adw.NavigationPage):
     upload_btt: Gtk.Button = Gtk.Template.Child()
     clear_btt: Gtk.Button = Gtk.Template.Child()
 
+    status_revealer: Gtk.Revealer = Gtk.Template.Child()
     total_progress: Gtk.ProgressBar = Gtk.Template.Child()
     info_label: Gtk.ProgressBar = Gtk.Template.Child()
     def __init__(self, protocol: SwitchUsb, window):
@@ -141,7 +152,7 @@ class RomsPage(Adw.NavigationPage):
 
     def __upload_roms(self):
         self.protocol.send_roms([x.get_rom_path() for x in self.roms])
-        functions = TransferProtocolFunctions(self.roms, self.total_progress, self.info_label)
+        functions = TransferProtocolFunctions(self.roms, self.status_revealer, self.total_progress, self.info_label)
         functions.connect_functions(self.protocol)
         self.protocol.poll_commands()
 
@@ -149,7 +160,7 @@ class RomsPage(Adw.NavigationPage):
     def clear_rom_list(self, _):
         self.__clear_rom_list()
     
-    @Task()
+    @task
     def __clear_rom_list(self):
         for r in self.roms:
             idle(self.delete_rom_item, r)
@@ -178,12 +189,14 @@ class RomsPage(Adw.NavigationPage):
 
         dialog.open(self.window, callback=self.__add_rom_cb)
     
-    def __check_if_rom_is_added(self, file, cb):
+    def __check_if_rom_is_added(self, file):
         for r in self.roms:
             if r.get_rom_path() == file.get_path():
                 self.window.add_toast("Rom already added")
                 return
-        cb()
+            elif os.path.splitext(r.get_rom_path())[1] not in [".nsp", ".xci"]:
+                self.window.add_toast("Invalid rom")
+                return
     
     def __add_rom_cb(self, dialog: Gtk.FileDialog, result):
         try:
@@ -195,5 +208,5 @@ class RomsPage(Adw.NavigationPage):
             nonlocal file
             item = RomItem(file, self.delete_rom_item)
             idle(self.append_rom_to_box, item)
-        
-        CallbackTask(self.__check_if_rom_is_added, fn_args=[file, add]).start()
+
+        CallbackTask(self.__check_if_rom_is_added, add, fn_args=[file]).start()
