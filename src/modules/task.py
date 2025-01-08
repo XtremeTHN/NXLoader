@@ -6,6 +6,17 @@ from gi.repository import Gio
 class Task(threading.Thread):
     unfinished_stoppable_tasks = []
     def __init__(self, func=None, args=[], kwargs=[]):
+        """
+        Initializes a Task object.
+        This class is used to run a function in a separate thread.
+
+        Args:
+            func: The function to be called when the task is run.
+            args: A list of arguments to be passed to the function.
+            kwargs: A dictionary of keyword arguments to be passed to the function.
+
+        """
+        
         super().__init__()
         
         self.func = func
@@ -25,37 +36,57 @@ class Task(threading.Thread):
         for t in Task.unfinished_stoppable_tasks:
             t.stop()
 
-    def __call__(self, func):
-        def wrapper(*args, **kwargs):
-            self.set_function(func, args=args, kwargs=kwargs)
-            self.start()
-            return self
-        
-        return wrapper
+def task(func):
+    """
+    Decorator to run a function asynchronously in a separate thread.
 
-# TODO: Change name
+    Args:
+        func: The function to be executed in a background thread.
+
+    Returns:
+        A wrapper function that, when called, will execute the given
+        function in a new Task thread.
+    """
+
+    def wrapper(*args, **kwargs):
+        t = Task(func=func, args=args, kwargs=kwargs)
+        # Task.unfinished_stoppable_tasks.append(t)
+        t.start()
+    
+    return wrapper
+
 class CallbackTask(threading.Thread):
-    def __init__(self, fn, cb=None, fn_args=[], cb_args=[]):
+    def __init__(self, fn, cb, fn_args=[], fn_kwargs={}, cb_args=[], cb_kwargs={}):
+        """
+        This class executes a function in a separate thread and calls a callback function when the task is finished.
+
+        Args:
+            fn: The function to be executed in the thread.
+            cb: The callback function to be executed after the task is finished.
+            fn_args: A list of arguments to be passed to the function.
+            cb_args: A list of arguments to be passed to the callback.
+        """
         super().__init__()
 
         self.fn = fn
-        self.cb = cb or CallbackTask.placeholder
+        self.cb = cb
         self.fn_args = fn_args
+        self.fn_kwargs = fn_kwargs
         self.cb_args = cb_args
-
-    @staticmethod
-    def placeholder(*_, **__):
-        pass
+        self.cb_kwargs = cb_kwargs
 
     def run(self):
-        self.fn(*self.fn_args)
-        self.cb(*self.cb_args)
+        self.fn(*self.fn_args, **self.fn_kwargs)
+        self.cb(*self.cb_args, **self.cb_kwargs)
 
 class RepeatTask(Task):
-    def __init__(self, callback):
-        super().__init__()
+    """
+        Repeat a function in a thread until the stop method is called
+    """
+    def __init__(self, function, args=[], kwargs={}):
+        super().__init__(args=args, kwargs=kwargs)
 
-        self.cb = callback
+        self.func = function
         self.stop_flag = threading.Event()
     
     def start(self):
@@ -71,4 +102,6 @@ class RepeatTask(Task):
     
     def run(self):
         while self.stop_flag.is_set() is False:
-            self.cb()
+            self.func(*self.args, **self.kwargs)
+        
+        Task.unfinished_stoppable_tasks.remove(self)
