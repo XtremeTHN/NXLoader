@@ -130,8 +130,9 @@ class RomsPage(Adw.NavigationPage):
         def alert_cb(dialog, result):
             if dialog is not None:
                 choosed = dialog.choose_finish(result)
-                if choosed == "cancel":
+                if choosed in ["cancel", "close"]:
                     return
+                
             self.__upload_roms()
 
         if self.window.settings.get_boolean("show-upload-alert") is True:
