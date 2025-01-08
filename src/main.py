@@ -26,6 +26,7 @@ gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw, Gdk
 from .ui.window import NxloaderWindow
+from .modules.task import Task
 
 class NxloaderApplication(Adw.Application):
     """The main application singleton class."""
@@ -39,6 +40,8 @@ class NxloaderApplication(Adw.Application):
         style = Gtk.CssProvider.new()
         style.load_from_resource("/com/github/XtremeTHN/NXLoader/style.css")
 
+        self.window = None
+
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         
     def do_activate(self):
@@ -47,10 +50,13 @@ class NxloaderApplication(Adw.Application):
         We raise the application's main window, creating it if
         necessary.
         """
-        win = self.props.active_window
-        if not win:
-            win = NxloaderWindow(self)
-        win.present()
+        # win = self.props.active_window
+        # if not win:
+        #     win = NxloaderWindow(self)
+        
+        # self.window = win
+        self.window = NxloaderWindow(self)
+        self.window.present()
 
     def on_about_action(self, *args):
         """Callback for the app.about action."""
@@ -67,6 +73,10 @@ class NxloaderApplication(Adw.Application):
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
         print('app.preferences action activated')
+    
+    def cleanup(self):
+        self.window.finder.protocol.close()
+        Task.stop_unfinished_tasks()
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.
@@ -87,4 +97,7 @@ class NxloaderApplication(Adw.Application):
 def main(version):
     """The application's entry point."""
     app = NxloaderApplication()
-    return app.run(sys.argv)
+    exit_code = app.run(sys.argv)
+    app.cleanup()
+
+    return exit_code

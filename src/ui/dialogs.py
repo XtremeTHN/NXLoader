@@ -13,9 +13,13 @@ class GetStartedDialog(Adw.Dialog):
 @Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/upload-alert.ui")
 class UploadAlert(Adw.AlertDialog):
     __gtype_name__ = "UploadAlert"
+
+    check_btt = Gtk.Template.Child()
     def __init__(self, settings):
         super().__init__()
         self.settings = settings
+
+        self.check_btt.connect("toggled", self.do_not_show_again)
 
     def do_not_show_again(self, check: Gtk.CheckButton):
         self.settings.set_boolean("show-upload-alert", check.get_active() is True)

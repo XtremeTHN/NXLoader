@@ -41,7 +41,7 @@ template $Rom : Adw.Bin {
           clicked => $remove_rom();
         }
       }
-      Gtk.Revealer {
+      Gtk.Revealer rom_revealer {
         reveal-child: false;
         transition-duration: 500;
         child: Gtk.ProgressBar rom_progress {

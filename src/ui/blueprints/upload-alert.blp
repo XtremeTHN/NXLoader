@@ -5,11 +5,12 @@ template $UploadAlert : Adw.AlertDialog {
   heading: "Warning";
   body: "Transferring ROMs via USB can lead to minor erros. If you encounter an error, try transferring again";
 
-  close-response: "cancel";
-
-  extra-child: Gtk.CheckButton {
+  // default-response: "ok";
+  // close-response: "cancel";
+  extra-child: Gtk.CheckButton check_btt {
     label: "Do not show again";
-    toggled => $do_not_show_again();
+    // idk why this removes the buttons from the dialog
+    // toggled => $do_not_show_again();
   };
 
   responses [

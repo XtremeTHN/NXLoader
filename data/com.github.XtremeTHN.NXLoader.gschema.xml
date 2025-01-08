@@ -7,7 +7,7 @@
 	    <summary>Is first time launch</summary>
 	  </key>
 
-	  <key name="show-upload-alert">
+	  <key name="show-upload-alert" type="b">
 	  	<default>true</default>
 		<description>If the upload alert should be displayed</description>
 		<summary>Show alert</summary>

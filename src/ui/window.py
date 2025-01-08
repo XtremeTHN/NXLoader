@@ -18,10 +18,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from gi.repository import Adw
-from gi.repository import Gtk, Gio, GObject
-from gi.repository import GUdev
+from gi.repository import Gtk, Gio, GLib
 
 from ..modules.switchfinder import SwitchFinder
+
 from .dialogs import GetStartedDialog
 
 from .roms_page import RomsPage
@@ -43,8 +43,8 @@ class NxloaderWindow(Adw.ApplicationWindow):
         self.finder.connect("connected", self.show_roms_page)
         self.finder.connect("disconnected", self.show_not_found)
 
-        # self.navigation.add(NotFoundPage)
-        self.navigation.add(RomsPage(self.finder, self))
+        self.navigation.add(NotFoundPage())
+        self.navigation.add(RomsPage(self.finder.protocol, self))
 
         self.navigation.connect("notify::visible-page", self.reset)
 

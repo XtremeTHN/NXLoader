@@ -4,13 +4,9 @@ import logging
 import os
 
 from struct import unpack, pack
-from pathlib import Path
 
-def info_cb(magic: bytes, cmd_type: int, cmd_id: int, data_size: int):
-    print("Magic:", magic.decode())
-
-def progress_cb(current, max):
-    print(f"Bytes sended: {current}", flush=True)
+from .task import Task
+from gi.repository import GObject, Gio
 
 EXIT=0
 FILE_RANGE=1
@@ -38,11 +34,18 @@ class Endpoint:
         self.logger.debug("Reading from endpoint...")
         return self.ep.read(size_or_buffer, timeout)
     
-class SwitchUsb():
+class SwitchUsb(GObject.GObject):
+    __gsignals__ = {
+        "send": (GObject.SIGNAL_RUN_FIRST, None, (str, int)),
+        "info": (GObject.SIGNAL_RUN_FIRST, None, (str,))
+    }
     def __init__(self):
+        super().__init__()
         self.dev: usb.core.Device | None = None
         self.out_ep: usb.core.Endpoint | None = None
         self.in_ep: usb.core.Endpoint | None = None
+
+        self.cancellable = Gio.Cancellable.new()
 
         self.logger = logging.getLogger("SwitchUsb")
 
@@ -82,6 +85,7 @@ class SwitchUsb():
     def __send_list_header(self, len):
         try:
             self.logger.debug("Sending header with rom list length of %d", len)
+            self.emit("info", "Sending rom list...")
             # magic header
             self.out_ep.write(b'TUL0')
             # the length of the rom list
@@ -107,40 +111,33 @@ class SwitchUsb():
                 pass
             usb.util.dispose_resources(self.dev)
     
-    def validate_roms(self, roms: list[Path]):
+    def validate_roms(self, roms: list[str]):
         result = []
         roms_length = 0
         for file in roms:
-            if file.is_file() is False or file.suffix not in [".nsp", ".xci"]:
-                self.logger.debug(f"{file.is_file()} {file.suffix}")
-                self.logger.warning(f"{str(file)} is not a valid rom")
+            if os.path.isfile(file) is False or os.path.splitext(file)[1] not in [".nsp", ".xci"]:
+                self.logger.warning(f"{file} is not a valid rom")
                 continue
-            self.logger.debug(f"{file.is_file()} {file.suffix} {file}")
-            result.append(str(file) + "\n")
-            roms_length += len(str(file)) + 1
+            result.append(file + "\n")
+            roms_length += len(file) + 1
 
         return result, roms_length
     
-    def send_roms(self, roms: list[Path]):
+    @Task()
+    def send_roms(self, roms: list[str]):
+        if self.dev is None:
+            raise ValueError("Switch device is none")
         roms_list, roms_len = self.validate_roms(roms)
         self.logger.debug(roms_len)
 
         # sends header to awoo installer
         self.__send_list_header(roms_len)
 
-        # sends the roms one by one
+        # sends the roms names one by one
         for rom in roms_list:
             self.out_ep.write(rom)
-        
-    def send_roms_folder(self, folder: str):
-        folder: Path = Path(folder)
-
-        if folder.is_dir() is False:
-            raise FileNotFoundError(f"{folder} doesn't exists")
-
-        self.send_roms(folder.iterdir())
     
-    def __send_file(self, prog_cb, padding=False):
+    def __send_file(self, padding=False):
         def _unpack(data):
             return unpack('<Q', data)[0]
         header = self.in_ep.read(0x20)
@@ -150,13 +147,16 @@ class SwitchUsb():
         rom_name_len = _unpack(header[16:24])
 
         rom_name = bytes(self.in_ep.read(rom_name_len)).decode()
+        self.emit("info", f"Sending rom: {os.path.basename(rom_name)}")
+
         cmd_id = FILE_RANGE if not padding else FILE_RANGE_PADDED
         self.__send_file_response_header(cmd_id, range_size)
 
         BUFFER_SEGMENT_DATA_SIZE = 0x100000
         PADDING_SIZE = 0x1000
 
-        rom_length = os.stat(rom_name).st_size
+        # rom_length = os.stat(rom_name).st_size
+
         with open(rom_name, "rb") as file:
             # move the file cursor to the offset
             file.seek(range_offset)
@@ -172,15 +172,19 @@ class SwitchUsb():
                     read_size = end_offset - current_offset
                 
                 buf = file.read(read_size)
-                prog_cb(read_size, rom_length)
+                # prog_cb(read_size, rom_length)
+                self.emit("send", rom_name, read_size)
                 if padding is True:
                     buf = b'\x00' * PADDING_SIZE + buf
                 
                 self.out_ep.write(buf, timeout=0)
                 current_offset += read_size
     
-    def poll_commands(self, info_cb=info_cb, prog_cb=progress_cb):
-        while True:
+    @Task()
+    def poll_commands(self):
+        while self.cancellable.is_cancelled() is False:
+            self.emit("info", "Waiting for command...")
+
             cmd_header = bytes(self.in_ep.read(0x20, timeout=0))
             magic = cmd_header[:4]
             if magic != b"TUC0":
@@ -188,14 +192,16 @@ class SwitchUsb():
                 continue
             
             cmd_id = unpack("<I", cmd_header[8:12])[0]
-            cmd_type = unpack('<B', cmd_header[4:5])[0]
-            data_size = unpack('<Q', cmd_header[12:20])[0]
+            # cmd_type = unpack('<B', cmd_header[4:5])[0]
+            # data_size = unpack('<Q', cmd_header[12:20])[0]
 
-            info_cb(magic, cmd_type, cmd_id, data_size)
+            # info_cb(magic, cmd_type, cmd_id, data_size)
             
             if cmd_id == EXIT:
+                self.emit("info", "Exit recieved")
                 self.logger.info('Exiting')
                 break
             elif cmd_id in [FILE_RANGE, FILE_RANGE_PADDED]:
-                self.__send_file(prog_cb, padding=cmd_id == FILE_RANGE_PADDED)
+                self.emit("info", "File command recieved")
+                self.__send_file(padding=cmd_id == FILE_RANGE_PADDED)
             
