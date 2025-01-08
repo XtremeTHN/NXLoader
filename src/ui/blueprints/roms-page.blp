@@ -26,7 +26,6 @@ template $RomsPage : Adw.NavigationPage {
             orientation: vertical;
 
             Gtk.Revealer {
-              reveal-child: true;
               child: Gtk.Box {
                 spacing: 5;
                 orientation: vertical;
@@ -35,9 +34,7 @@ template $RomsPage : Adw.NavigationPage {
                   halign: start;
                 }
 
-                Gtk.ProgressBar total_progress{
-                  
-                }
+                Gtk.ProgressBar total_progress {}
               };
             }
 
