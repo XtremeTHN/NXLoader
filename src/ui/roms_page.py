@@ -54,19 +54,23 @@ class RomItem(Adw.Bin):
         idle(self.rom_progress.set_fraction, self.current_progress / self.size)
     
 class TransferProtocolFunctions:
-    def __init__(self, roms: list[RomItem], revealer: Gtk.Revealer, total_progress: Gtk.ProgressBar, prog_label: Gtk.Label):
+    # def __init__(self, roms: list[RomItem], revealer: Gtk.Revealer, total_progress: Gtk.ProgressBar, prog_label: Gtk.Label):
+    def __init__(self, page):
         self.roms: dict[str, RomItem] = {}
 
-        self.prog_label = prog_label
-        self.total_progress = total_progress
+        self.prog_label = page.info_label
+        self.total_progress = page.total_progress
         self.total_progress_current = 0
         self.total_progress_max = 0
 
-        self.revealer = revealer
+        self.revealer = page.status_revealer
+
+        self.upload_btt = page.upload_btt
+        self.clear_btt = page.clear_btt
 
         self.pulse_task = RepeatTask(self.pulse_progress)
 
-        for r in roms:
+        for r in page.roms:
             self.roms[r.get_rom_path()] = r
             self.total_progress_max += r.get_total_size()
     
@@ -90,9 +94,13 @@ class TransferProtocolFunctions:
     
     def on_start(self, _):
         self.revealer.set_reveal_child(True)
+        self.upload_btt.set_sensitive(False)
+        self.clear_btt.set_sensitive(False)
     
     def on_exit(self, _):
         self.revealer.set_reveal_child(False)
+        self.upload_btt.set_sensitive(True)
+        self.clear_btt.set_sensitive(True)
     
     def update_total_progress(self, progress):
         self.total_progress_current += progress
@@ -154,7 +162,7 @@ class RomsPage(Adw.NavigationPage):
 
     def __upload_roms(self):
         self.protocol.send_roms([x.get_rom_path() for x in self.roms])
-        functions = TransferProtocolFunctions(self.roms, self.status_revealer, self.total_progress, self.info_label)
+        functions = TransferProtocolFunctions(self)
         functions.connect_functions(self.protocol)
         self.protocol.poll_commands()
 
