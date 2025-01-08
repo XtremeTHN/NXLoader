@@ -138,7 +138,6 @@ class RomsPage(Adw.NavigationPage):
             dialog = UploadAlert(self.window.settings)
             dialog.choose(self.window, None, alert_cb)
 
-    @Task()
     def __upload_roms(self):
         self.protocol.send_roms([x.get_rom_path() for x in self.roms])
         functions = TransferProtocolFunctions(self.roms, self.total_progress, self.info_label)
