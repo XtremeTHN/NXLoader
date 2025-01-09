@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="nxloader">
 	<schema id="com.github.XtremeTHN.NXLoader" path="/com/github/XtremeTHN/NXLoader/">
-	  <key name="first-time" type="b">
+	  <key name="first-run" type="b">
 	    <default>true</default>
 	    <description>If this is the first time that the user opens the app</description>
 	    <summary>Is first time launch</summary>
