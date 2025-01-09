@@ -48,7 +48,13 @@ class NxloaderWindow(Adw.ApplicationWindow):
 
         self.navigation.connect("notify::visible-page", self.reset)
 
-        self.finder.start()
+        if self.settings.get_boolean("first-run"):
+            self.settings.set_boolean("first-run", False)
+            dialog = GetStartedDialog(self.settings)
+            dialog.connect("closed", lambda _: self.finder.start())
+            dialog.present(self)
+        else:
+            self.finder.start()
 
     def add_toast(self, title):
         self.toast.add_toast(Adw.Toast.new(title))

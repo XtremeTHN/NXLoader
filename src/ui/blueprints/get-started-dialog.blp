@@ -2,10 +2,12 @@ using Gtk 4.0;
 using Adw 1;
 
 template $GetStartedDialog : Adw.Dialog {
+    content-width: 500;
     child: Adw.NavigationView {
       Adw.NavigationPage {
         title: "Welcome";
         tag: "welcome-page";
+
         child: Adw.ToolbarView {
           [top]
           Adw.HeaderBar {}
@@ -14,6 +16,10 @@ template $GetStartedDialog : Adw.Dialog {
             icon-name: "switch-symbolic";
             title: "NXLoader";
             description: "A program made for facilitating the installation of nintendo switch roms through usb";
+            margin-end: 10;
+            margin-start: 10;
+            margin-bottom: 10;
+            margin-top: 10;
             child: Adw.Clamp {
                 maximum-size: 60;
                 child: Gtk.Button {
