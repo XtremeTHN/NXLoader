@@ -23,22 +23,22 @@ class SwitchFinder(GObject.GObject):
         self.client.connect('uevent', self.__create_obj)
 
     def __create_obj(self, _, action: str, device: GUdev.Device):
-        if action == "add":
-            # Check if this device is a nintendo switch
-            if device.get_property("ID_VENDOR_FROM_DATABASE") != "Nintendo Co., Ltd":
+        # Check if this device is a nintendo switch
+        if device.get_property("ID_VENDOR_FROM_DATABASE") != "Nintendo Co., Ltd":
+            return
+        
+        # PRODUCT is something like this: 57e/3000/100
+        if (p:=device.get_property("PRODUCT")) is not None:
+            p = p.split("/")
+            if len(p) < 2:
                 return
-            
-            # PRODUCT is something like this: 57e/3000/100
-            if (p:=device.get_property("PRODUCT")) is not None:
-                p = p.split("/")
-                if len(p) < 2:
-                    return
-                if p[1] != "3000":
-                    return
-                
+            if p[1] != "3000":
+                return
+
+        if action == "add":
             sw = self.protocol.find_switch()
             self.protocol.set_switch(sw)
             self.emit("connected")
-        else:
+        elif action == "remove":
             self.protocol.close()
             self.emit("disconnected")
