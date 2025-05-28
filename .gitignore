@@ -1,3 +1,6 @@
 /subprojects/blueprint-compiler
 installation
 build
+
+.direnv
+result
