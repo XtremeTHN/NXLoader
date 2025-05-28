@@ -14,7 +14,7 @@ meson -C build install
 
 ## NixOS
 Add this repo to your inputs
-```
+```nix
 # flake.nix
 inputs.nxloader.url = "github:XtremeTHN/NXLoader";
 ```
