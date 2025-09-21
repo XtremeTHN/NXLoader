@@ -43,7 +43,7 @@ class NxloaderWindow(Adw.ApplicationWindow):
         self.finder.connect("connected", self.show_roms_page)
         self.finder.connect("disconnected", self.show_not_found)
 
-        self.navigation.add(NotFoundPage())
+        # self.navigation.add(NotFoundPage())
         self.navigation.add(RomsPage(self.finder.protocol, self))
 
         self.navigation.connect("notify::visible-page", self.reset)

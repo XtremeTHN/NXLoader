@@ -14,6 +14,7 @@ template $RomsPage: Adw.NavigationPage {
         clicked => $clear_rom_list();
         tooltip-text: _("Clear all");
       }
+
       [end]
       Gtk.Button {
         icon-name: "plus-large-symbolic";
@@ -56,26 +57,7 @@ template $RomsPage: Adw.NavigationPage {
     }
 
     content: Gtk.ScrolledWindow {
-      child: ListBox roms_box {
-        styles [
-          "roms",
-        ]
-
-        selection-mode: none;
-        margin-top: 10;
-        margin-bottom: 10;
-        margin-start: 10;
-        margin-end: 10;
-
-        [placeholder]
-        Adw.StatusPage no_roms_status_page {
-          hexpand: true;
-          vexpand: true;
-          icon-name: "folder-games-symbolic";
-          title: "No rooms";
-          description: "Add roms through the plus button above. Only .nsp or .xci roms are allowed.";
-        }
-      };
+      child: $RomsBox roms_box {};
     };
   };
 }

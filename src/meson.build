@@ -7,6 +7,7 @@ blueprints = files(
   'ui/blueprints/get-started-dialog.blp',
   'ui/blueprints/not-found-page.blp',
   'ui/blueprints/rom.blp',
+  'ui/blueprints/roms-box.blp',
   'ui/blueprints/roms-page.blp',
   'ui/blueprints/upload-alert.blp'
 )

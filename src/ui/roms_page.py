@@ -1,4 +1,4 @@
-from gi.repository import Gtk, Adw, Gio, GLib
+from gi.repository import Gtk, Adw, Gio, GLib, Gdk
 from ..modules.usbInstall import SwitchUsb
 # from ..modules.glist import List
 # from ..modules.task import task, CallbackTask, RepeatTask
@@ -76,12 +76,69 @@ class RomItem(Gtk.ListBoxRow):
         idle(self.rom_progress.set_fraction, self.current_progress / self.size)
 
 
+@Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/roms-box.ui")
+class RomsBox(Gtk.ListBox):
+    __gtype_name__ = "RomsBox"
+
+    no_roms_status_page: Gtk.Widget = Gtk.Template.Child()
+    def __init__(self):
+        super().__init__()
+
+        self.model = Gio.ListStore.new(Gio.File)
+        self.bind_model(self.model, self.build_rom)
+
+        self.target = Gtk.DropTarget(
+            formats=Gdk.ContentFormats.new_for_gtype(Gdk.FileList),
+            actions=Gdk.DragAction.COPY
+        )
+
+        self.target.connect("enter", self.__on_enter)
+        self.target.connect("motion", self.__on_motion)
+        self.target.connect("drop", self.__on_drop)
+
+        self.add_controller(self.target)
+    
+    def append(self, file: Gio.File):
+        self.model.append(file)
+    
+    def remove(self, file: Gio.File):
+        if (n := self.model.find(file))[0]:
+            self.model.remove(n[1])
+
+    def build_rom(self, rom: Gio.File):
+        return RomItem(rom, self.delete_rom_item)
+    
+    def delete_rom_item(self, item: RomItem):
+        self.remove(item.file)
+
+    def check_if_rom_is_added(self, file: Gio.File):
+        for r in self.model:
+            if r.get_path() == file.get_path():
+                self.get_root().add_toast(f"{file.get_basename()} is already here")
+                return True
+            elif os.path.splitext(r.get_path())[1] not in [".nsp", ".xci"]:
+                self.get_root().add_toast(f"{file.get_basename()} is an invalid rom")
+                return True
+        return False
+    
+    def __on_enter(self, _, x, y):
+        return Gdk.DragAction.COPY
+    
+    def __on_motion(self, _, x, y):
+        return Gdk.DragAction.COPY
+
+    def __on_drop(self, _, values: Gdk.FileList, x, y):
+        for file in values.get_files():
+            if self.check_if_rom_is_added(file) is False:
+                self.model.append(file)
+        return True
+
+
 @Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/roms-page.ui")
 class RomsPage(Adw.NavigationPage):
     __gtype_name__ = "RomsPage"
 
-    roms_box: Gtk.ListBox = Gtk.Template.Child()
-    no_roms_status_page: Gtk.Widget = Gtk.Template.Child()
+    roms_box: RomsBox = Gtk.Template.Child()
 
     upload_btt: Gtk.Button = Gtk.Template.Child()
     clear_btt: Gtk.Button = Gtk.Template.Child()
@@ -95,37 +152,22 @@ class RomsPage(Adw.NavigationPage):
 
         self.protocol = protocol
         self.window = window
-        self.roms = Gio.ListStore.new(Gio.File)
 
         self.current_rom: RomItem | None = None
         self.total_roms_size = 0
         self.current_bytes = 0
 
-        self.roms.connect("items-changed", self.change_widget_states)
-        self.roms_box.bind_model(self.roms, self.build_rom)
+        self.roms_box.model.connect("items-changed", self.change_widget_states)
 
         self.pulse = Pulse(self.total_progress)
 
         self.change_widget_states(None)
 
-    def build_rom(self, rom: Gio.File):
-        return RomItem(rom, self.delete_rom_item)
-
     def change_widget_states(self, *_):
-        if_roms = len(self.roms) > 0
+        if_roms = len(self.roms_box.model) > 0
         # self.no_roms_status_page.set_visible(if_roms is False)
         self.upload_btt.set_sensitive(if_roms)
         self.clear_btt.set_sensitive(if_roms)
-
-    def __check_if_rom_is_added(self, file):
-        for r in self.roms:
-            if r.get_path() == file.get_path():
-                self.window.add_toast("Rom already added")
-                return True
-            elif os.path.splitext(r.get_path())[1] not in [".nsp", ".xci"]:
-                self.window.add_toast("Invalid rom")
-                return True
-        return False
 
     def __add_rom_cb(self, dialog: Gtk.FileDialog, result):
         try:
@@ -133,14 +175,13 @@ class RomsPage(Adw.NavigationPage):
         except GLib.Error:
             return
 
-        if self.__check_if_rom_is_added(file) is False:
-            print(file.get_path())
-            self.roms.append(file)
+        if self.roms_box.check_if_rom_is_added(file) is False:
+            self.roms_box.append(file)
 
     def __upload_roms(self):
         roms = []
 
-        for index, rom in enumerate(self.roms):
+        for index, rom in enumerate(self.roms_box.model):
             roms.append(rom.get_path())
             self.total_roms_size += self.roms_box.get_row_at_index(index).size
         
@@ -156,15 +197,11 @@ class RomsPage(Adw.NavigationPage):
 
         self.protocol.poll_commands()
 
-    def delete_rom_item(self, item: RomItem):
-        if (n := self.roms.find(item.file))[0]:
-            self.roms.remove(n[1])
-
     def on_info(self, _, info):
         idle(self.info_label.set_label, info)
 
     def on_file(self, _, file):
-        for index, f in enumerate(self.roms):
+        for index, f in enumerate(self.roms_box.model):
             if f.get_path() == file:
                 self.current_rom = self.roms_box.get_row_at_index(index)
                 self.current_rom.reveal_progress()
@@ -188,7 +225,7 @@ class RomsPage(Adw.NavigationPage):
 
     @Gtk.Template.Callback()
     def clear_rom_list(self, _):
-        self.roms.remove_all()
+        self.roms_box.model.remove_all()
 
     @Gtk.Template.Callback()
     def upload_roms(self, _):
