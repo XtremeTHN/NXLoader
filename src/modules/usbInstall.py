@@ -36,7 +36,8 @@ class Endpoint:
     
 class SwitchUsb(GObject.GObject):
     __gsignals__ = {
-        "send": (GObject.SIGNAL_RUN_FIRST, None, (str, int)),
+        "file": (GObject.SIGNAL_RUN_FIRST, None, (str,)),
+        "send": (GObject.SIGNAL_RUN_FIRST, None, (int,)),
         "info": (GObject.SIGNAL_RUN_FIRST, None, (str,)),
         "start": (GObject.SIGNAL_RUN_FIRST, None, tuple()),
         "exit": (GObject.SIGNAL_RUN_FIRST, None, tuple())
@@ -149,6 +150,7 @@ class SwitchUsb(GObject.GObject):
         rom_name_len = _unpack(header[16:24])
 
         rom_name = bytes(self.in_ep.read(rom_name_len)).decode()
+        self.emit("file", rom_name)
         self.emit("info", f"Sending rom: {os.path.basename(rom_name)}")
 
         cmd_id = FILE_RANGE if not padding else FILE_RANGE_PADDED
@@ -175,7 +177,7 @@ class SwitchUsb(GObject.GObject):
                 
                 buf = file.read(read_size)
                 # prog_cb(read_size, rom_length)
-                self.emit("send", rom_name, read_size)
+                self.emit("send", read_size)
                 if padding is True:
                     buf = b'\x00' * PADDING_SIZE + buf
                 

@@ -1,71 +1,81 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $RomsPage : Adw.NavigationPage {
-    title: "NXLoader";
-    tag: "roms-page";
-    child: Adw.ToolbarView {
-        top-bar-style: raised;
+template $RomsPage: Adw.NavigationPage {
+  title: "NXLoader";
+  tag: "roms-page";
 
-        [top]
-        Adw.HeaderBar {
-            [end]
-            Gtk.Button {
-              icon-name: "plus-large-symbolic";
-              clicked => $add_rom();
-            }
-        }
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      [end]
+      Gtk.Button clear_btt {
+        icon-name: "user-trash-symbolic";
+        clicked => $clear_rom_list();
+        tooltip-text: _("Clear all");
+      }
+      [end]
+      Gtk.Button {
+        icon-name: "plus-large-symbolic";
+        clicked => $add_rom();
+        tooltip-text: _("Add rom");
+      }
+    }
 
-        [bottom]
-        Gtk.Box {
-            margin-top: 10;
-            margin-bottom: 10;
-            margin-end: 10;
-            margin-start: 10;
-            spacing: 5;
-            orientation: vertical;
+    [bottom]
+    Gtk.Box {
+      margin-bottom: 10;
+      margin-end: 10;
+      margin-start: 10;
+      spacing: 5;
+      orientation: vertical;
 
-            Gtk.Revealer status_revealer {
-              child: Gtk.Box {
-                spacing: 5;
-                orientation: vertical;
-                Gtk.Label info_label {
-                  label: "Sending roms...";
-                  halign: start;
-                }
+      Gtk.Revealer status_revealer {
+        child: Gtk.Box {
+          spacing: 5;
+          orientation: vertical;
 
-                Gtk.ProgressBar total_progress {}
-              };
-            }
+          Gtk.Label info_label {
+            label: "Sending roms...";
+            halign: start;
+          }
 
-            Gtk.Box {
-              spacing: 10;
-              Gtk.Button upload_btt {
-                hexpand: true;
-                label: "Upload to switch";
-                clicked => $upload_roms();
-              }
-              Gtk.Button clear_btt {
-                hexpand: true;
-                label: "Clear rom list";
-                clicked => $clear_rom_list();
-              }
-            }
-        }
-
-        content: Gtk.ScrolledWindow { 
-          child: Gtk.Box roms_box {
-            margin-top: 10;
-            orientation: vertical;
-            spacing: 10;
-            Adw.StatusPage no_roms_status_page {
-              hexpand: true;
-              vexpand: true;
-              icon-name: "folder-games-symbolic";
-              title: "No rooms";
-              description: "Add roms through the plus button above. You need to add files with extension .nsp or .xci.";
-            }
-          };
+          Gtk.ProgressBar total_progress {}
         };
+      }
+
+      Gtk.Box {
+        spacing: 10;
+
+        Gtk.Button upload_btt {
+          hexpand: true;
+          label: "Upload to switch";
+          clicked => $upload_roms();
+        }
+      }
+    }
+
+    content: Gtk.ScrolledWindow {
+      child: ListBox roms_box {
+        styles [
+          "roms",
+        ]
+
+        selection-mode: none;
+        margin-top: 10;
+        margin-bottom: 10;
+        margin-start: 10;
+        margin-end: 10;
+
+        [placeholder]
+        Adw.StatusPage no_roms_status_page {
+          hexpand: true;
+          vexpand: true;
+          icon-name: "folder-games-symbolic";
+          title: "No rooms";
+          description: "Add roms through the plus button above. Only .nsp or .xci roms are allowed.";
+        }
+      };
     };
+  };
 }

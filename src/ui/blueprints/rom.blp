@@ -1,57 +1,65 @@
 using Gtk 4.0;
-using Adw 1;
-template $Rom : Adw.Bin {
-  child: Adw.Clamp {
-    child: Gtk.Box {
-      styles [
-        "card"
-      ]
-      orientation: vertical;
-      hexpand: true;
-      vexpand: false;
-      
-      valign: start;
+
+template $Rom : Gtk.ListBoxRow {
+  styles ["card"]
+  child: Gtk.Box {
+    orientation: vertical;
+
+    Gtk.Box {
+      margin-top: 10;
+      margin-bottom: 10;
+      margin-start: 10;
+      margin-end: 10;
+      spacing: 30;
+
       Gtk.Box {
-        margin-top: 10;
-        margin-bottom: 10;
-        margin-start: 10;
-        margin-end: 10;
-        spacing: 30;
-        Gtk.Box {
-          orientation: vertical;
-          hexpand: true;
-          Gtk.Label rom_title {
-            styles [
-              "title-4"
-            ]
-            halign: start;
-          }
-          Gtk.Label rom_format {
-            halign: start;
-          }
-          Gtk.Label rom_size {
-            halign: start;
-          }
-        }
-      
-        Gtk.Button {
-          valign: center;
-          halign: end;
-          icon-name: "user-trash-symbolic";
-          clicked => $remove_rom();
-        }
-      }
-      Gtk.Revealer rom_revealer {
-        reveal-child: false;
-        transition-duration: 500;
-        child: Gtk.ProgressBar rom_progress {
+        orientation: vertical;
+        hexpand: true;
+
+        Gtk.Label rom_title {
           styles [
-            "merged"
+            "heading",
           ]
-          margin-start: 1;
-          margin-end: 1;
-        };
+
+          xalign: 0;
+        }
+
+        Gtk.Label rom_format {
+          styles [
+            "caption",
+          ]
+
+          opacity: 0.6;
+          xalign: 0;
+        }
+
+        Gtk.Label rom_size {
+          styles [
+            "caption",
+          ]
+
+          opacity: 0.6;
+          xalign: 0;
+        }
       }
-    };
+
+      Gtk.Button {
+        valign: center;
+        halign: end;
+        icon-name: "user-trash-symbolic";
+        clicked => $remove_rom();
+      }
+    }
+
+    Gtk.Revealer rom_revealer {
+      reveal-child: false;
+      transition-duration: 500;
+
+      child: Gtk.ProgressBar rom_progress {
+        styles [
+          "merged",
+        ]
+      };
+    }
   };
 }

@@ -1,7 +1,11 @@
-.rom {
+/* .rom {
     padding: 20px;
-  }
+  } */
   
+.roms {
+    background: none;
+}
+
 .merged > trough {
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
