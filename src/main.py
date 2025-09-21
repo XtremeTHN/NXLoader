@@ -43,6 +43,7 @@ class NxloaderApplication(Adw.Application):
 
         self.window = None
 
+        self.get_style_manager().set_color_scheme(Adw.ColorScheme.PREFER_DARK) # TODO: Remove when done testing
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
     
     def on_exception(self, exc_type, exc_value, exc_traceback):

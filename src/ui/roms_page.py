@@ -80,23 +80,11 @@ class RomItem(Gtk.ListBoxRow):
 class RomsBox(Gtk.ListBox):
     __gtype_name__ = "RomsBox"
 
-    no_roms_status_page: Gtk.Widget = Gtk.Template.Child()
     def __init__(self):
         super().__init__()
 
         self.model = Gio.ListStore.new(Gio.File)
         self.bind_model(self.model, self.build_rom)
-
-        self.target = Gtk.DropTarget(
-            formats=Gdk.ContentFormats.new_for_gtype(Gdk.FileList),
-            actions=Gdk.DragAction.COPY
-        )
-
-        self.target.connect("enter", self.__on_enter)
-        self.target.connect("motion", self.__on_motion)
-        self.target.connect("drop", self.__on_drop)
-
-        self.add_controller(self.target)
     
     def append(self, file: Gio.File):
         self.model.append(file)
@@ -112,32 +100,25 @@ class RomsBox(Gtk.ListBox):
         self.remove(item.file)
 
     def check_if_rom_is_added(self, file: Gio.File):
+        rom_basename = file.get_basename()
+
+        if os.path.splitext(rom_basename)[1] not in [".nsp", ".xci"]:
+            self.get_root().add_toast(f"{rom_basename} is an invalid rom")
+            return True
+        
         for r in self.model:
             if r.get_path() == file.get_path():
-                self.get_root().add_toast(f"{file.get_basename()} is already here")
-                return True
-            elif os.path.splitext(r.get_path())[1] not in [".nsp", ".xci"]:
-                self.get_root().add_toast(f"{file.get_basename()} is an invalid rom")
+                self.get_root().add_toast(f"{rom_basename} is already here")
                 return True
         return False
     
-    def __on_enter(self, _, x, y):
-        return Gdk.DragAction.COPY
-    
-    def __on_motion(self, _, x, y):
-        return Gdk.DragAction.COPY
-
-    def __on_drop(self, _, values: Gdk.FileList, x, y):
-        for file in values.get_files():
-            if self.check_if_rom_is_added(file) is False:
-                self.model.append(file)
-        return True
-
 
 @Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/roms-page.ui")
 class RomsPage(Adw.NavigationPage):
     __gtype_name__ = "RomsPage"
 
+    stack: Gtk.Stack = Gtk.Template.Child()
+    no_roms_status_page: Adw.StatusPage = Gtk.Template.Child()
     roms_box: RomsBox = Gtk.Template.Child()
 
     upload_btt: Gtk.Button = Gtk.Template.Child()
@@ -161,13 +142,36 @@ class RomsPage(Adw.NavigationPage):
 
         self.pulse = Pulse(self.total_progress)
 
+        target = Gtk.DropTarget(
+            formats=Gdk.ContentFormats.new_for_gtype(Gdk.FileList),
+            actions=Gdk.DragAction.COPY
+        )
+
+        target.connect("enter", self.__on_enter)
+        target.connect("motion", self.__on_motion)
+        target.connect("drop", self.__on_drop)
+
+        self.stack.add_controller(target)
         self.change_widget_states(None)
 
     def change_widget_states(self, *_):
         if_roms = len(self.roms_box.model) > 0
-        # self.no_roms_status_page.set_visible(if_roms is False)
+
+        self.stack.set_visible_child(self.roms_box if if_roms else self.no_roms_status_page)
         self.upload_btt.set_sensitive(if_roms)
         self.clear_btt.set_sensitive(if_roms)
+    
+    def __on_enter(self, _, x, y):
+        return Gdk.DragAction.COPY
+    
+    def __on_motion(self, _, x, y):
+        return Gdk.DragAction.COPY
+
+    def __on_drop(self, _, values: Gdk.FileList, x, y):
+        for file in values.get_files():
+            if self.roms_box.check_if_rom_is_added(file) is False:
+                self.roms_box.append(file)
+        return True
 
     def __add_rom_cb(self, dialog: Gtk.FileDialog, result):
         try:

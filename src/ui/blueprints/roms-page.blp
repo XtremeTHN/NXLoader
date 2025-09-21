@@ -57,7 +57,18 @@ template $RomsPage: Adw.NavigationPage {
     }
 
     content: Gtk.ScrolledWindow {
-      child: $RomsBox roms_box {};
+      child: Stack stack {
+        Adw.StatusPage no_roms_status_page {
+          styles ["placeholder"]
+          hexpand: true;
+          vexpand: true;
+          icon-name: "folder-games-symbolic";
+          title: "No rooms";
+          description: "Add roms through the plus button above. Only .nsp or .xci roms are allowed.";
+        }
+        
+        $RomsBox roms_box {}
+      };
     };
   };
 }
