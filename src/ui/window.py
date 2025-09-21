@@ -63,7 +63,10 @@ class NxloaderWindow(Adw.ApplicationWindow):
         self.navigation.pop_to_tag("switch-not-found")
         self.add_toast("Switch disconnected")
     
-    def show_roms_page(self, _):
+    def show_roms_page(self, _, msg):
+        if msg != "":
+            self.add_toast(msg)
+            return
         self.navigation.push_by_tag("roms-page")
         self.add_toast("Switch connected")
 
