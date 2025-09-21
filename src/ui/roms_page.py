@@ -187,7 +187,7 @@ class RomsPage(Adw.NavigationPage):
     
 
     @Gtk.Template.Callback()
-    def clear_rom_list(self):
+    def clear_rom_list(self, _):
         self.roms.remove_all()
 
     @Gtk.Template.Callback()
