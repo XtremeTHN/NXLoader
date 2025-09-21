@@ -5,6 +5,7 @@ A gtk app for installing switch games
 ## Preview
 ![1](.github/assets/1.png)
 ![2](.github/assets/2.png)
+![3](.github/assets/3.png)
 
 ## Installing
 ### General
