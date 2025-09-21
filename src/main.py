@@ -17,6 +17,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import traceback
 import sys
 import gi
 
@@ -43,6 +44,35 @@ class NxloaderApplication(Adw.Application):
         self.window = None
 
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    
+    def on_exception(self, exc_type, exc_value, exc_traceback):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        dialog = Adw.AlertDialog.new(
+            heading=exc_type.__name__,
+            body="Report this issue in the GitHub page.",
+        )
+
+        trace = Gtk.TextView(
+            css_classes=['monospace'],
+            editable=False,
+            cursor_visible=False,
+            margin_start=5,
+            margin_bottom=5,
+            margin_end=5,
+            margin_top=5
+        )
+        scrolled = Gtk.ScrolledWindow(child=trace, min_content_width=400, min_content_height=200)
+        frame = Gtk.Frame(child=scrolled)
+
+        dialog.add_response("accept", "Accept")
+
+        trace.get_buffer().set_text(''.join(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+
+        dialog.set_extra_child(frame)
+
+        dialog.connect("response", lambda *_: self.quit() if self.window is None else None)
+
+        dialog.present(self.window)
         
     def do_activate(self):
         """Called when the application is activated.
@@ -50,11 +80,8 @@ class NxloaderApplication(Adw.Application):
         We raise the application's main window, creating it if
         necessary.
         """
-        # win = self.props.active_window
-        # if not win:
-        #     win = NxloaderWindow(self)
-        
-        # self.window = win
+
+        sys.excepthook = self.on_exception
         self.window = NxloaderWindow(self)
         self.window.present()
 
@@ -67,7 +94,7 @@ class NxloaderApplication(Adw.Application):
                                 developers=['Unknown'],
                                 copyright='© 2024 Unknown')
         # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
-        about.set_translator_credits(_('translator-credits'))
+        # about.set_translator_credits(_('translator-credits'))
         about.present(self.props.active_window)
 
     def on_preferences_action(self, widget, _):
@@ -75,7 +102,8 @@ class NxloaderApplication(Adw.Application):
         print('app.preferences action activated')
     
     def cleanup(self):
-        self.window.finder.protocol.close()
+        if self.window:
+            self.window.finder.protocol.close()
         Task.stop_unfinished_tasks()
 
     def create_action(self, name, callback, shortcuts=None):
