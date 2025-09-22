@@ -11,9 +11,6 @@ class SwitchFinder(GObject.GObject):
         super().__init__()
 
         self.protocol = SwitchUsb()
-        # if (n:=self.protocol.find_switch()) is not None:
-        #     self.protocol.set_switch(n)
-        #     self.emit("connected")
     
     def set_switch(self, dev):
         msg = ""
