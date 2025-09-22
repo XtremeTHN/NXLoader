@@ -52,28 +52,13 @@ class SwitchUsb(GObject.GObject):
 
         self.logger = logging.getLogger("SwitchUsb")
 
-    def __enter__(self):
-        """Init
-
-        Returns:
-            SwitchUsb: Returns switchusb
-        """
-        self.__init__()
-        return self
-    
-    def __exit__(self, *args):
-        print(args)
-        self.close()
-
     def set_switch(self, switch: usb.Device):
         self.dev = switch
         self.__configure_usb()
 
-    def find_switch(self):
-        dev = usb.core.find(idVendor=0x057E, idProduct=0x3000)
-        
-        if dev is not None:
-            return dev
+    def find_switch(self) -> usb.core.Device | None:
+        dev = usb.core.find(idVendor=0x057E, idProduct=0x3000)        
+        return dev
 
     def __configure_usb(self):
         self.logger.debug("Configurating device...")
@@ -95,7 +80,7 @@ class SwitchUsb(GObject.GObject):
             self.out_ep.write(pack("<I", len))
             # idk what this does
             self.out_ep.write(b'\x00' * 0x8) # padding ?
-        except:
+        except Exception:
             self.logger.exception("Couldn't send header to the switch")
     
     def __send_file_response_header(self, cmd_id, data_size):
@@ -110,7 +95,7 @@ class SwitchUsb(GObject.GObject):
         if self.dev is not None:
             try:
                 self.dev.reset()
-            except:
+            except Exception:
                 pass
             usb.util.dispose_resources(self.dev)
     
