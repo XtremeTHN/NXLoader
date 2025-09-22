@@ -1,11 +1,8 @@
 from gi.repository import Gtk, Adw, Gio, GLib, Gdk
 from ..modules.usbInstall import SwitchUsb
-# from ..modules.glist import List
-# from ..modules.task import task, CallbackTask, RepeatTask
 
 from .dialogs import UploadAlert
 
-import time
 import os
 
 def idle(func, *args):
@@ -157,7 +154,7 @@ class RomsPage(Adw.NavigationPage):
     def change_widget_states(self, *_):
         if_roms = len(self.roms_box.model) > 0
 
-        self.stack.set_visible_child(self.roms_box if if_roms else self.no_roms_status_page)
+        self.stack.set_visible_child_name("roms" if if_roms else "placeholder")
         self.upload_btt.set_sensitive(if_roms)
         self.clear_btt.set_sensitive(if_roms)
     
