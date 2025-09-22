@@ -3,12 +3,13 @@ using Gtk 4.0;
 template $Rom: Gtk.ListBoxRow {
   child: Gtk.Box {
     orientation: vertical;
+    margin-top: 10;
+    margin-bottom: 10;
+    margin-start: 10;
+    margin-end: 10;
+    spacing: 10;
 
     Gtk.Box {
-      margin-top: 10;
-      margin-bottom: 10;
-      margin-start: 10;
-      margin-end: 10;
       spacing: 30;
 
       Gtk.Box {
@@ -16,10 +17,6 @@ template $Rom: Gtk.ListBoxRow {
         hexpand: true;
 
         Gtk.Label rom_title {
-          styles [
-            "heading",
-          ]
-
           xalign: 0;
         }
 
@@ -54,11 +51,7 @@ template $Rom: Gtk.ListBoxRow {
       reveal-child: false;
       transition-duration: 500;
 
-      child: Gtk.ProgressBar rom_progress {
-        styles [
-          "merged",
-        ]
-      };
+      child: Gtk.ProgressBar rom_progress {};
     }
   };
 }
