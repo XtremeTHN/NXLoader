@@ -17,6 +17,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import threading
 import traceback
 import sys
 import gi
@@ -25,7 +26,7 @@ gi.require_version('GUdev', '1.0')
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
-from gi.repository import Gtk, Gio, Adw, Gdk
+from gi.repository import Gtk, Gio, Adw, Gdk, GLib
 from .ui.window import NxloaderWindow
 from .modules.task import Task
 
@@ -42,16 +43,27 @@ class NxloaderApplication(Adw.Application):
         style.load_from_resource("/com/github/XtremeTHN/NXLoader/style.css")
 
         self.window = None
+        self.thread_hook = threading.excepthook
 
         self.get_style_manager().set_color_scheme(Adw.ColorScheme.PREFER_DARK) # TODO: Remove when done testing
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
     
-    def on_exception(self, exc_type, exc_value, exc_traceback):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+    def on_thread_exc(self, exc_info: threading.ExceptHookArgs):
+        GLib.idle_add(self.on_exception, exc_info.exc_type, exc_info.exc_value, exc_info.exc_traceback, exc_info.thread.name)
+
+    def on_exception(self, exc_type, exc_value, exc_tb, threadId=None):
+        if threadId:
+            print("Thread name: ", threadId)
+        sys.__excepthook__(exc_type, exc_value, exc_tb)
         dialog = Adw.AlertDialog.new(
             heading=exc_type.__name__,
             body="Report this issue in the GitHub page.",
         )
+
+        buff = Gtk.TextBuffer()
+
+        if threadId:
+            buff.set_text(f"Thread name:  {threadId}\n")
 
         trace = Gtk.TextView(
             css_classes=['monospace'],
@@ -60,14 +72,15 @@ class NxloaderApplication(Adw.Application):
             margin_start=5,
             margin_bottom=5,
             margin_end=5,
-            margin_top=5
+            margin_top=5,
+            buffer=buff
         )
         scrolled = Gtk.ScrolledWindow(child=trace, min_content_width=400, min_content_height=200)
         frame = Gtk.Frame(child=scrolled)
 
         dialog.add_response("accept", "Accept")
 
-        trace.get_buffer().set_text(''.join(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+        buff.insert_at_cursor(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
 
         dialog.set_extra_child(frame)
 
@@ -83,6 +96,7 @@ class NxloaderApplication(Adw.Application):
         """
 
         sys.excepthook = self.on_exception
+        threading.excepthook = self.on_thread_exc
         self.window = NxloaderWindow(self)
         self.window.present()
 
