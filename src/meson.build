@@ -2,33 +2,6 @@ pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
 moduledir = pkgdatadir / 'nxloader'
 gnome = import('gnome')
 
-blueprints = files(
-	'ui/blueprints/window.blp',
-  'ui/blueprints/get-started-dialog.blp',
-  'ui/blueprints/not-found-page.blp',
-  'ui/blueprints/rom.blp',
-  'ui/blueprints/roms-box.blp',
-  'ui/blueprints/roms-page.blp',
-  'ui/blueprints/upload-alert.blp'
-)
-
-gnome.compile_resources('nxloader',
-  'nxloader.gresource.xml',
-  gresource_bundle: true,
-  dependencies: custom_target('blueprints',
-    input: blueprints,
-    output: '.',
-    command: [
-      find_program('blueprint-compiler'),
-      'batch-compile',
-      '@OUTPUT@',
-      '@CURRENT_SOURCE_DIR@',
-      '@INPUT@'
-    ]),
-  install: true,
-  install_dir: pkgdatadir,
-)
-
 python = import('python')
 python_i = python.find_installation('python3', modules: ['usb', 'gi'])
 
@@ -56,3 +29,11 @@ install_data(nxloader_sources, install_dir: moduledir)
 
 subdir('modules')
 subdir('ui')
+
+gnome.compile_resources('nxloader',
+  'nxloader.gresource.xml',
+  gresource_bundle: true,
+  dependencies: blueprints,
+  install: true,
+  install_dir: pkgdatadir,
+)

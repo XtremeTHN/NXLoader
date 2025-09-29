@@ -6,7 +6,10 @@ ui_sources = [
     'dialogs.py',
     'not_found.py',
     'roms_page.py',
+    'exception_dialog.py',
     'window.py'
 ]
 
 install_data(ui_sources, install_dir: moduledir)
+
+subdir('blueprints')

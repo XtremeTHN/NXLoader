@@ -1,0 +1,30 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $ExceptionDialog: Adw.AlertDialog {
+    default-response: "accept";
+    body: _("Report this error in the GitHub page.");
+
+    extra-child: Frame {
+        child: ScrolledWindow {
+            min-content-height: 150;
+
+            child: TextView traceback_view {
+                styles [
+                    "monospace",
+                ]
+
+                left-margin: 5;
+                right-margin: 5;
+                top-margin: 5;
+                bottom-margin: 5;
+                cursor-visible: false;
+                editable: false;
+            };
+        };
+    };
+
+    responses [
+        accept: _("Accept"),
+    ]
+}

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/github/XtremeTHN/NXLoader">
-    <file preprocess="xml-stripblanks" alias="window.ui">ui/blueprints/window.ui</file>
-    <file preprocess="xml-stripblanks" alias="get-started-dialog.ui">ui/blueprints/get-started-dialog.ui</file>
-    <file preprocess="xml-stripblanks" alias="rom.ui">ui/blueprints/rom.ui</file>
-    <file preprocess="xml-stripblanks" alias="roms-box.ui">ui/blueprints/roms-box.ui</file>
-    <file preprocess="xml-stripblanks" alias="roms-page.ui">ui/blueprints/roms-page.ui</file>
-    <file preprocess="xml-stripblanks" alias="not-found-page.ui">ui/blueprints/not-found-page.ui</file>
-    <file preprocess="xml-stripblanks" alias="upload-alert.ui">ui/blueprints/upload-alert.ui</file>
+    <file preprocess="xml-stripblanks">window.ui</file>
+    <file preprocess="xml-stripblanks">get-started-dialog.ui</file>
+    <file preprocess="xml-stripblanks">rom.ui</file>
+    <file preprocess="xml-stripblanks">roms-box.ui</file>
+    <file preprocess="xml-stripblanks">roms-page.ui</file>
+    <file preprocess="xml-stripblanks">not-found-page.ui</file>
+    <file preprocess="xml-stripblanks">upload-alert.ui</file>
+    <file preprocess="xml-stripblanks">exception-dialog.ui</file>
 
     <file alias="style.css">ui/style.css</file>
   </gresource>

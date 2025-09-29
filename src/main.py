@@ -22,72 +22,55 @@ import traceback
 import sys
 import gi
 
-gi.require_version('GUdev', '1.0')
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+gi.require_version("GUdev", "1.0")
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
 from gi.repository import Gtk, Gio, Adw, Gdk, GLib
 from .ui.window import NxloaderWindow
+from .ui.exception_dialog import ExceptionDialog
 from .modules.task import Task
+
 
 class NxloaderApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='com.github.XtremeTHN.NXLoader',
-                         flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
-        self.create_action('quit', lambda *_: self.quit(), ['<primary>q'])
-        self.create_action('about', self.on_about_action)
-
-        style = Gtk.CssProvider.new()
-        style.load_from_resource("/com/github/XtremeTHN/NXLoader/style.css")
+        super().__init__(
+            application_id="com.github.XtremeTHN.NXLoader",
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
+        )
+        self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
+        self.create_action("about", self.on_about_action)
 
         self.window = None
         self.thread_hook = threading.excepthook
 
-        self.get_style_manager().set_color_scheme(Adw.ColorScheme.PREFER_DARK) # TODO: Remove when done testing
-        Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-    
     def on_thread_exc(self, exc_info: threading.ExceptHookArgs):
-        GLib.idle_add(self.on_exception, exc_info.exc_type, exc_info.exc_value, exc_info.exc_traceback, exc_info.thread.name)
+        GLib.idle_add(
+            self.on_exception,
+            exc_info.exc_type,
+            exc_info.exc_value,
+            exc_info.exc_traceback,
+            exc_info.thread.name,
+        )
 
     def on_exception(self, exc_type, exc_value, exc_tb, threadId=None):
         if threadId:
             print("Thread name: ", threadId)
+
         sys.__excepthook__(exc_type, exc_value, exc_tb)
-        dialog = Adw.AlertDialog.new(
-            heading=exc_type.__name__,
-            body="Report this issue in the GitHub page.",
+        dialog = ExceptionDialog()
+        dialog.set_exception_info(exc_type, exc_value, exc_tb)
+
+        dialog.connect(
+            "response", lambda *_: self.quit() if self.window is None else None
         )
-
-        buff = Gtk.TextBuffer()
-
-        if threadId:
-            buff.set_text(f"Thread name:  {threadId}\n")
-
-        trace = Gtk.TextView(
-            css_classes=['monospace'],
-            editable=False,
-            cursor_visible=False,
-            margin_start=5,
-            margin_bottom=5,
-            margin_end=5,
-            margin_top=5,
-            buffer=buff
-        )
-        scrolled = Gtk.ScrolledWindow(child=trace, min_content_width=400, min_content_height=200)
-        frame = Gtk.Frame(child=scrolled)
-
-        dialog.add_response("accept", "Accept")
-
-        buff.insert_at_cursor(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
-
-        dialog.set_extra_child(frame)
-
-        dialog.connect("response", lambda *_: self.quit() if self.window is None else None)
 
         dialog.present(self.window)
-        
+
+        self.hold()
+
     def do_activate(self):
         """Called when the application is activated.
 
@@ -102,20 +85,22 @@ class NxloaderApplication(Adw.Application):
 
     def on_about_action(self, *args):
         """Callback for the app.about action."""
-        about = Adw.AboutDialog(application_name='nxloader',
-                                application_icon='com.github.XtremeTHN.NXLoader',
-                                developer_name='Unknown',
-                                version='0.1.0',
-                                developers=['Unknown'],
-                                copyright='© 2024 Unknown')
+        about = Adw.AboutDialog(
+            application_name="nxloader",
+            application_icon="com.github.XtremeTHN.NXLoader",
+            developer_name="Unknown",
+            version="0.1.0",
+            developers=["Unknown"],
+            copyright="© 2024 Unknown",
+        )
         # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
         # about.set_translator_credits(_('translator-credits'))
         about.present(self.props.active_window)
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
-        print('app.preferences action activated')
-    
+        print("app.preferences action activated")
+
     def cleanup(self):
         if self.window:
             self.window.finder.protocol.close()
