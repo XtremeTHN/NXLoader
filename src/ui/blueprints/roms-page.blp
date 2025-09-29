@@ -60,16 +60,19 @@ template $RomsPage: Adw.NavigationPage {
       child: Stack stack {
         StackPage {
           name: "placeholder";
+
           child: Adw.StatusPage no_roms_status_page {
             hexpand: true;
             vexpand: true;
-            icon-name: "folder-games-symbolic";
+            icon-name: "nintendo-controller-symbolic";
             title: "No rooms";
             description: "Add roms through the plus button above. Only .nsp or .xci roms are allowed.";
           };
         }
+
         StackPage {
           name: "roms";
+
           child: Adw.Clamp {
             $RomsBox roms_box {}
           };

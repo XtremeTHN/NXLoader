@@ -14,6 +14,7 @@
 
   <gresource prefix="/com/github/XtremeTHN/NXLoader/icons/scalable/actions/">
     <file preprocess="xml-stripblanks" alias="switch-symbolic.svg">ui/icons/switch-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="nintendo-controller-symbolic.svg">ui/icons/nintendo-controller-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="plus-large-symbolic.svg">ui/icons/plus-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="drive-harddisk-usb-symbolic.svg">ui/icons/drive-harddisk-usb-symbolic.svg</file>
   </gresource>

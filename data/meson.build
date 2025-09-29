@@ -43,4 +43,7 @@ configure_file(
   install_dir: get_option('datadir') / 'dbus-1' / 'services'
 )
 
+install_data('99-nxloader-switch.rules', install_dir: '/usr/lib/udev/rules.d')
+run_command('udevadm', 'control', '--reload-rules')
+
 subdir('icons')
