@@ -7,6 +7,11 @@ A gtk app for installing switch games
 ![2](.github/assets/2.png)
 ![3](.github/assets/3.png)
 
+## Known bugs
+This bugs may not be fixed cuz i don't know what is causing them
+- Sometimes the progress bars are not in sync (eg: the progress bar of the only rom item in the box not in sync with the total progress bar)
+- If an error ocurrs before sending the roms, the next try will fail due to an overflow
+
 ## Installing
 ### General
 ```
