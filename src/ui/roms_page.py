@@ -5,29 +5,32 @@ from .dialogs import UploadAlert
 
 import os
 
+
 def idle(func, *args):
     GLib.idle_add(func, *args)
+
 
 class Pulse:
     def __init__(self, progress):
         self.running = GLib.SOURCE_REMOVE
         self.progress = progress
-    
+
     def start(self):
         print(self.running)
         if self.running == GLib.SOURCE_CONTINUE:
             return
-        
+
         print("Starting pulse")
         self.running = GLib.SOURCE_CONTINUE
         GLib.timeout_add(400, self.pulse)
-    
+
     def stop(self):
         self.running = GLib.SOURCE_REMOVE
-    
+
     def pulse(self):
         self.progress.pulse()
         return self.running
+
 
 @Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/rom.ui")
 class RomItem(Gtk.ListBoxRow):
@@ -45,7 +48,9 @@ class RomItem(Gtk.ListBoxRow):
         self.file = rom_file
         self.delete_func = delete_func
 
-        info = self.file.query_info("standard::size,standard::name", Gio.FileQueryInfoFlags.NONE, None)
+        info = self.file.query_info(
+            "standard::size,standard::name", Gio.FileQueryInfoFlags.NONE, None
+        )
         filename = os.path.splitext(info.get_name())
         self.size = info.get_size()
         self.current_progress = 0
@@ -53,17 +58,21 @@ class RomItem(Gtk.ListBoxRow):
         self.rom_title.set_label(filename[0])
         self.rom_format.set_label("Format: " + filename[1])
         self.rom_size.set_label("Size: " + GLib.format_size(self.size))
-    
-    def reveal_progress(self):
-        if self.rom_revealer.get_reveal_child() is False:
-            idle(self.rom_revealer.set_reveal_child, True)
-    
+
+    def reveal_progress(self, reveal):
+        idle(self.rom_revealer.set_reveal_child, reveal)
+
     def get_total_size(self):
         return self.size
 
+    def reset(self):
+        idle(self.rom_progress.set_fraction, 0)
+        self.reveal_progress(False)
+        self.current_progress = 0
+
     def get_rom_path(self):
         return self.file.get_path()
-    
+
     @Gtk.Template.Callback()
     def remove_rom(self, _):
         self.delete_func(self)
@@ -82,17 +91,17 @@ class RomsBox(Gtk.ListBox):
 
         self.model = Gio.ListStore.new(Gio.File)
         self.bind_model(self.model, self.build_rom)
-    
+
     def append(self, file: Gio.File):
         self.model.append(file)
-    
+
     def remove(self, file: Gio.File):
         if (n := self.model.find(file))[0]:
             self.model.remove(n[1])
 
     def build_rom(self, rom: Gio.File):
         return RomItem(rom, self.delete_rom_item)
-    
+
     def delete_rom_item(self, item: RomItem):
         self.remove(item.file)
 
@@ -102,13 +111,13 @@ class RomsBox(Gtk.ListBox):
         if os.path.splitext(rom_basename)[1] not in [".nsp", ".xci"]:
             self.get_root().add_toast(f"{rom_basename} is an invalid rom")
             return True
-        
+
         for r in self.model:
             if r.get_path() == file.get_path():
                 self.get_root().add_toast(f"{rom_basename} is already here")
                 return True
         return False
-    
+
 
 @Gtk.Template(resource_path="/com/github/XtremeTHN/NXLoader/roms-page.ui")
 class RomsPage(Adw.NavigationPage):
@@ -141,7 +150,7 @@ class RomsPage(Adw.NavigationPage):
 
         target = Gtk.DropTarget(
             formats=Gdk.ContentFormats.new_for_gtype(Gdk.FileList),
-            actions=Gdk.DragAction.COPY
+            actions=Gdk.DragAction.COPY,
         )
 
         target.connect("enter", self.__on_enter)
@@ -157,10 +166,10 @@ class RomsPage(Adw.NavigationPage):
         self.stack.set_visible_child_name("roms" if if_roms else "placeholder")
         self.upload_btt.set_sensitive(if_roms)
         self.clear_btt.set_sensitive(if_roms)
-    
+
     def __on_enter(self, _, x, y):
         return Gdk.DragAction.COPY
-    
+
     def __on_motion(self, _, x, y):
         return Gdk.DragAction.COPY
 
@@ -185,18 +194,28 @@ class RomsPage(Adw.NavigationPage):
         for index, rom in enumerate(self.roms_box.model):
             roms.append(rom.get_path())
             self.total_roms_size += self.roms_box.get_row_at_index(index).size
-        
+
         self.protocol.send_roms(roms)
 
         self.protocol.connect("info", self.on_info)
         self.protocol.connect("send", self.on_update)
         self.protocol.connect("file", self.on_file)
-        self.protocol.connect("start", self.change_upload_state, True)
-        self.protocol.connect("exit", self.change_upload_state, False)
+        self.protocol.connect("start", self.change_upload_state)
+        self.protocol.connect("exit", lambda _: idle(self.reset_state))
+        self.protocol.connect("error", lambda _: idle(self.reset_state))
 
         self.pulse.start()
 
         self.protocol.poll_commands()
+
+    def reset_state(self):
+        for index, _ in enumerate(self.roms_box.model):
+            self.roms_box.get_row_at_index(index).reset()
+
+        self.info_label.set_label("")
+        self.total_progress.set_fraction(0)
+        self.status_revealer.set_reveal_child(False)
+        self.current_bytes = 0
 
     def on_info(self, _, info):
         idle(self.info_label.set_label, info)
@@ -205,7 +224,7 @@ class RomsPage(Adw.NavigationPage):
         for index, f in enumerate(self.roms_box.model):
             if f.get_path() == file:
                 self.current_rom = self.roms_box.get_row_at_index(index)
-                self.current_rom.reveal_progress()
+                self.current_rom.reveal_progress(True)
                 break
         self.pulse.stop()
 
@@ -215,14 +234,14 @@ class RomsPage(Adw.NavigationPage):
             return
         self.current_rom.update_progress(read_size)
         self.current_bytes += read_size
-        idle(self.total_progress.set_fraction, self.current_bytes / self.total_roms_size)
+        idle(
+            self.total_progress.set_fraction, self.current_bytes / self.total_roms_size
+        )
 
-    def change_upload_state(self, _, is_start):
-        self.status_revealer.set_reveal_child(is_start)
-        self.upload_btt.set_sensitive(not is_start)
-        self.clear_btt.set_sensitive(not is_start)
-        self.total_progress.set_fraction(0)
-    
+    def change_upload_state(self, _):
+        self.status_revealer.set_reveal_child(True)
+        self.upload_btt.set_sensitive(True)
+        self.clear_btt.set_sensitive(True)
 
     @Gtk.Template.Callback()
     def clear_rom_list(self, _):

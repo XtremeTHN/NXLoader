@@ -69,7 +69,8 @@ class NxloaderApplication(Adw.Application):
 
         dialog.present(self.window)
 
-        self.hold()
+        if self.window is None:
+            self.hold()
 
     def do_activate(self):
         """Called when the application is activated.
