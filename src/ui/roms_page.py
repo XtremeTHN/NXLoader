@@ -2,9 +2,10 @@ from gi.repository import Gtk, Adw, Gio, GLib, Gdk
 
 
 from ..modules.usbInstall import SwitchUsb
+from ..modules.utils import add_toast
 
 from .dialogs import UploadAlert
-from .rom_info import RomInfo
+from ..modules.rom_info import RomInfo
 
 import os
 
@@ -51,29 +52,30 @@ class RomItem(Gtk.ListBoxRow):
         self.file = rom_file
         self.delete_func = delete_func
 
-        info = self.file.query_info(
+        self.info = self.file.query_info(
             "standard::size,standard::name", Gio.FileQueryInfoFlags.NONE, None
         )
-        filename = os.path.splitext(info.get_name())
-        self.size = info.get_size()
+        self.size = self.info.get_size()
         self.current_progress = 0
-
-        self.set_widget_data(rom_file, filename)
     
-    def set_widget_data(self, file, filename):
-        try:
-            r = RomInfo(file)
-        
-            self.rom_title.set_label(r.name)
-            self.rom_version.set_label(f"Version: {r.version}")
-            self.rom_size.set_label("Size: " + GLib.format_size(self.size))
-            self.icon.set_paintable(r.icon)
-        except Exception as e:
-            print("failed to parse rom:", e)
-            self.frame.set_visible(False)
-            self.rom_title.set_label(filename[0])
-            self.rom_version.set_label("Format: " + filename[1])
-            self.rom_size.set_label("Size: " + GLib.format_size(self.size))
+    def set_normal_data(self):
+        filename = os.path.splitext(self.info.get_name())
+
+        i = Gtk.Image.new_from_icon_name("image-missing-symbolic")
+        i.set_pixel_size(60)
+        self.frame.set_child(i)
+        self.rom_title.set_label(filename[0])
+        self.rom_version.set_label("Format: " + filename[1])
+        self.rom_size.set_label("Size: " + GLib.format_size(self.size))
+    
+    def set_rom_data(self):
+        r = RomInfo(self.file)
+
+        self.rom_title.set_label(r.name)
+        self.rom_version.set_label(f"Version: {r.version}")
+        self.rom_size.set_label("Size: " + GLib.format_size(self.size))
+        self.icon.set_paintable(r.icon)
+
 
     def reveal_progress(self, reveal):
         idle(self.rom_revealer.set_reveal_child, reveal)
@@ -116,7 +118,15 @@ class RomsBox(Gtk.ListBox):
             self.model.remove(n[1])
 
     def build_rom(self, rom: Gio.File):
-        return RomItem(rom, self.delete_rom_item)
+        r = RomItem(rom, self.delete_rom_item)
+
+        try:
+            r.set_rom_data()
+            return r
+        except Exception as e:
+            add_toast(self, f"Couldn't get rom info: {e.args}")
+            r.set_normal_data()
+            return r
 
     def delete_rom_item(self, item: RomItem):
         self.remove(item.file)

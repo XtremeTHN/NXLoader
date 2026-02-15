@@ -5,6 +5,8 @@ modules_sources = [
     '__init__.py',
     'switchfinder.py',
     'usbInstall.py',
+    'rom_info.py',
+    'utils.py',
     'task.py'
 ]
 

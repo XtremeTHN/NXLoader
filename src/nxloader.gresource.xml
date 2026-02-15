@@ -18,5 +18,6 @@
     <file preprocess="xml-stripblanks" alias="nintendo-controller-symbolic.svg">ui/icons/nintendo-controller-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="plus-large-symbolic.svg">ui/icons/plus-large-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="drive-harddisk-usb-symbolic.svg">ui/icons/drive-harddisk-usb-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="image-missing-symbolic.svg">ui/icons/image-missing-symbolic.svg</file>
   </gresource>
 </gresources>

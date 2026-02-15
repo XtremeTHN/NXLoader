@@ -7,7 +7,10 @@ template $ExceptionDialog: Adw.AlertDialog {
 
     extra-child: Frame {
         child: ScrolledWindow {
-            min-content-height: 150;
+            max-content-height: 200;
+            max-content-width: 400;
+            propagate-natural-height: true;
+            propagate-natural-width: true;
 
             child: TextView traceback_view {
                 styles [
@@ -20,6 +23,7 @@ template $ExceptionDialog: Adw.AlertDialog {
                 bottom-margin: 5;
                 cursor-visible: false;
                 editable: false;
+                wrap-mode: word;
             };
         };
     };
