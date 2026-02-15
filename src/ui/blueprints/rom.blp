@@ -10,7 +10,19 @@ template $Rom: Gtk.ListBoxRow {
     spacing: 10;
 
     Gtk.Box {
-      spacing: 30;
+      spacing: 10;
+
+      Frame frame {
+        child: Overlay {
+          width-request: 60;
+          height-request: 60;
+
+          [overlay]
+          Picture icon {
+
+          }
+        };
+      }
 
       Gtk.Box {
         orientation: vertical;
@@ -20,7 +32,7 @@ template $Rom: Gtk.ListBoxRow {
           xalign: 0;
         }
 
-        Gtk.Label rom_format {
+        Gtk.Label rom_version {
           styles [
             "caption",
           ]

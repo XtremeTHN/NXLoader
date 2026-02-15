@@ -6,6 +6,7 @@ ui_sources = [
     'dialogs.py',
     'not_found.py',
     'roms_page.py',
+    'rom_info.py',
     'exception_dialog.py',
     'window.py'
 ]

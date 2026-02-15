@@ -1,7 +1,10 @@
 from gi.repository import Gtk, Adw, Gio, GLib, Gdk
+
+
 from ..modules.usbInstall import SwitchUsb
 
 from .dialogs import UploadAlert
+from .rom_info import RomInfo
 
 import os
 
@@ -34,8 +37,10 @@ class Pulse:
 class RomItem(Gtk.ListBoxRow):
     __gtype_name__ = "Rom"
 
+    frame: Gtk.Frame = Gtk.Template.Child()
+    icon: Gtk.Picture = Gtk.Template.Child()
     rom_title: Gtk.Label = Gtk.Template.Child()
-    rom_format: Gtk.Label = Gtk.Template.Child()
+    rom_version: Gtk.Label = Gtk.Template.Child()
     rom_size: Gtk.Label = Gtk.Template.Child()
     rom_progress: Gtk.ProgressBar = Gtk.Template.Child()
     rom_revealer: Gtk.Revealer = Gtk.Template.Child()
@@ -53,9 +58,22 @@ class RomItem(Gtk.ListBoxRow):
         self.size = info.get_size()
         self.current_progress = 0
 
-        self.rom_title.set_label(filename[0])
-        self.rom_format.set_label("Format: " + filename[1])
-        self.rom_size.set_label("Size: " + GLib.format_size(self.size))
+        self.set_widget_data(rom_file, filename)
+    
+    def set_widget_data(self, file, filename):
+        try:
+            r = RomInfo(file)
+        
+            self.rom_title.set_label(r.name)
+            self.rom_version.set_label(f"Version: {r.version}")
+            self.rom_size.set_label("Size: " + GLib.format_size(self.size))
+            self.icon.set_paintable(r.icon)
+        except Exception as e:
+            print("failed to parse rom:", e)
+            self.frame.set_visible(False)
+            self.rom_title.set_label(filename[0])
+            self.rom_version.set_label("Format: " + filename[1])
+            self.rom_size.set_label("Size: " + GLib.format_size(self.size))
 
     def reveal_progress(self, reveal):
         idle(self.rom_revealer.set_reveal_child, reveal)

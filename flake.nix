@@ -1,10 +1,14 @@
 {
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nxroms.url = "github:xtremethn/nxroms";
+  };
 
-  outputs = { self, nixpkgs }: let
+  outputs = { self, nixpkgs, nxroms }: let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
     python3 = (pkgs.python313.withPackages (ps: with ps; [
+      nxroms.packages.${system}.default
       pygobject3
       pycairo
       pyusb
