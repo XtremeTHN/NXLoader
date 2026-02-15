@@ -49,6 +49,9 @@ class GFileReadable(IReadable):
         b = self.stream.read_bytes(size)
         return b.get_data()
 
+    def close(self):
+        self.stream.close()
+
 
 @dataclass
 class RomInfo:
@@ -70,6 +73,8 @@ class RomInfo:
                 continue
 
             self.handle_control(x)
+        
+        r.close()
 
     def handle_dat(self, dat: Region):
         _data = b""
