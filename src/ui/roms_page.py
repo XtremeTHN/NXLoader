@@ -251,6 +251,7 @@ class RomsPage(Adw.NavigationPage):
         self.pulse.start()
 
         self.protocol.poll_commands()
+        self.upload_btt.set_sensitive(False)
 
     def reset_state(self):
         for index, _ in enumerate(self.roms_box.model):
@@ -260,6 +261,7 @@ class RomsPage(Adw.NavigationPage):
         self.total_progress.set_fraction(0)
         self.status_revealer.set_reveal_child(False)
         self.current_bytes = 0
+        self.upload_btt.set_sensitive(True)
 
     def on_info(self, _, info):
         idle(self.info_label.set_label, info)
