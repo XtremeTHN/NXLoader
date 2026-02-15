@@ -1,0 +1,6 @@
+option(
+    'udevrules',
+    type: 'string',
+    value: '/usr/lib/udev/rules.d',
+    description: 'Directory to install udev rules'
+)

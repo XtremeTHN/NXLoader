@@ -42,6 +42,10 @@
       versin = "0.1";
       src = ./.;
 
+      mesonFlags = [
+        "-Dudevrules=lib/udev/rules.d"
+      ];
+
       inherit nativeBuildInputs buildInputs;
     };
   };
