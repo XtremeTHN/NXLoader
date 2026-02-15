@@ -6,6 +6,7 @@ from ..modules.utils import add_toast
 
 from .dialogs import UploadAlert
 from ..modules.rom_info import RomInfo
+from nxroms.keys import KeysNotFound
 
 import os
 
@@ -107,6 +108,8 @@ class RomsBox(Gtk.ListBox):
     def __init__(self):
         super().__init__()
 
+        self.notified_about_keys = False
+
         self.model = Gio.ListStore.new(Gio.File)
         self.bind_model(self.model, self.build_rom)
 
@@ -122,11 +125,17 @@ class RomsBox(Gtk.ListBox):
 
         try:
             r.set_rom_data()
-            return r
-        except Exception as e:
-            add_toast(self, f"Couldn't get rom info: {e.args}")
+        except KeysNotFound:
+            if self.notified_about_keys is False:
+                add_toast(self, "Rom information is only available if a prod.keys file is in ~/.switch")
+                self.notified_about_keys = True
             r.set_normal_data()
-            return r
+        except Exception as e:
+            print(e)
+            add_toast(self, f"Couldn't get rom info: {' '.join([str(x) for x in e.args])}")
+            r.set_normal_data()
+
+        return r
 
     def delete_rom_item(self, item: RomItem):
         self.remove(item.file)

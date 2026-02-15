@@ -37,11 +37,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1771130374,
-        "narHash": "sha256-nyPv4DiHiWNLBvszEIac/vvlRBZ59FKx7tOv+1i82tc=",
+        "lastModified": 1771189547,
+        "narHash": "sha256-3tghNzA5MCRdA3CNMVF0h+uNB53tJxT/Irnzvcx8Z3s=",
         "owner": "xtremethn",
         "repo": "nxroms",
-        "rev": "ca5a1fd2833f9e6b03095147c1c7fdf08cf3b80a",
+        "rev": "81a05d2699ed6dff68bc0469ce45e5f5e8c8ff3a",
         "type": "github"
       },
       "original": {
