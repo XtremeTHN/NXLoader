@@ -2,6 +2,9 @@
 
 A gtk app for installing switch games
 
+## TODO
+rewrite into another language
+
 ## Preview
 ![1](.github/assets/1.png)
 ![2](.github/assets/2.png)
