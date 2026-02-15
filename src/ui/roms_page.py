@@ -16,11 +16,9 @@ class Pulse:
         self.progress = progress
 
     def start(self):
-        print(self.running)
         if self.running == GLib.SOURCE_CONTINUE:
             return
 
-        print("Starting pulse")
         self.running = GLib.SOURCE_CONTINUE
         GLib.timeout_add(400, self.pulse)
 
