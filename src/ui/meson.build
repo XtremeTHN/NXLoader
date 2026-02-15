@@ -7,6 +7,7 @@ ui_sources = [
     'not_found.py',
     'roms_page.py',
     'exception_dialog.py',
+    'circularprogress.py',
     'window.py'
 ]
 

@@ -1,4 +1,5 @@
 from gi.repository import Gtk, Adw, Gio, GLib, Gdk
+from .circularprogress import CircularProgressPaintable, Color
 
 
 from ..modules.usbInstall import SwitchUsb
@@ -44,14 +45,16 @@ class RomItem(Gtk.ListBoxRow):
     rom_title: Gtk.Label = Gtk.Template.Child()
     rom_version: Gtk.Label = Gtk.Template.Child()
     rom_size: Gtk.Label = Gtk.Template.Child()
-    rom_progress: Gtk.ProgressBar = Gtk.Template.Child()
-    rom_revealer: Gtk.Revealer = Gtk.Template.Child()
+
+    end_button_image: Gtk.Image = Gtk.Template.Child()
 
     def __init__(self, rom_file: Gio.File, delete_func):
         super().__init__()
 
         self.file = rom_file
         self.delete_func = delete_func
+
+        self.rom_progress = CircularProgressPaintable(self.end_button_image, "emblem-ok-symbolic")
 
         self.info = self.file.query_info(
             "standard::size,standard::name", Gio.FileQueryInfoFlags.NONE, None
@@ -77,9 +80,11 @@ class RomItem(Gtk.ListBoxRow):
         self.rom_size.set_label("Size: " + GLib.format_size(self.size))
         self.icon.set_paintable(r.icon)
 
-
     def reveal_progress(self, reveal):
-        idle(self.rom_revealer.set_reveal_child, reveal)
+        if reveal:
+            idle(self.end_button_image.set_from_paintable, self.rom_progress)
+        else:
+            idle(self.end_button_image.set_from_icon_name, "user-trash-symbolic")
 
     def get_total_size(self):
         return self.size
@@ -98,6 +103,10 @@ class RomItem(Gtk.ListBoxRow):
 
     def update_progress(self, progress):
         self.current_progress += progress
+
+        if self.current_progress >= self.size:
+            self.rom_progress.set_color(Color.SUCCESS)
+
         idle(self.rom_progress.set_fraction, self.current_progress / self.size)
 
 

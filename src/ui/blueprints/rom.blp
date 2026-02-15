@@ -54,16 +54,11 @@ template $Rom: Gtk.ListBoxRow {
       Gtk.Button {
         valign: center;
         halign: end;
-        icon-name: "user-trash-symbolic";
+        child: Image end_button_image {
+          icon-name: "user-trash-symbolic";
+        };
         clicked => $remove_rom();
       }
-    }
-
-    Gtk.Revealer rom_revealer {
-      reveal-child: false;
-      transition-duration: 500;
-
-      child: Gtk.ProgressBar rom_progress {};
     }
   };
 }
