@@ -223,13 +223,16 @@ class RomsPage(Adw.NavigationPage):
                 self.roms_box.append(file)
         return True
 
-    def __add_rom_cb(self, dialog: Gtk.FileDialog, result):
+    def __add_roms_cb(self, dialog: Gtk.FileDialog, result):
         try:
-            file = dialog.open_finish(result)
+            files = dialog.open_multiple_finish(result)
         except GLib.Error:
             return
 
-        if self.roms_box.check_if_rom_is_added(file) is False:
+        for file in files:
+            if self.roms_box.check_if_rom_is_added(file):
+                continue
+
             self.roms_box.append(file)
 
     def __upload_roms(self):
@@ -320,4 +323,4 @@ class RomsPage(Adw.NavigationPage):
 
         dialog.set_default_filter(filter)
 
-        dialog.open(self.window, callback=self.__add_rom_cb)
+        dialog.open_multiple(self.window, callback=self.__add_roms_cb)

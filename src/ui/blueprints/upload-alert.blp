@@ -3,9 +3,7 @@ using Adw 1;
 
 template $UploadAlert: Adw.AlertDialog {
   heading: "Warning";
-  body: "Transferring ROMs via USB can lead to minor erros. If you encounter an error, try transferring again";
-  // default-response: "ok";
-  // close-response: "cancel";
+  body: "If the upload fails, restart the application and try again. The partially installed content can be removed in the console settings";
   extra-child: Gtk.CheckButton check_btt {
     label: "Do not show again";
     // idk why this removes the buttons from the dialog
