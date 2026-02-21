@@ -17,6 +17,24 @@ This bugs may not be fixed cuz i don't know what is causing them
 
 ## Installing
 ### General
+#### Dependencies (archlinux names)
+- `python3`
+- `python-gobject`
+- `python-pyusb`
+- `python-pip`
+- `meson`
+- `ninja`
+- `pkg-config`
+- `gtk4`
+- `libadwaita`
+- `libgudev`
+- `blueprint-compiler`
+- `nxroms`
+
+You can get `nxroms` [here](https://github.com/XtremeTHN/NXLoader)
+
+#### Installing
+
 ```
 meson setup build
 meson -C build install
@@ -38,3 +56,4 @@ in {
     ];
 }
 ```
+
