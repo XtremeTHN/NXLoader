@@ -140,7 +140,6 @@ class RomsBox(Gtk.ListBox):
                 self.notified_about_keys = True
             r.set_normal_data()
         except Exception as e:
-            print(e)
             add_toast(self, f"Couldn't get rom info: {' '.join([str(x) for x in e.args])}")
             r.set_normal_data()
 

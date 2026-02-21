@@ -4,7 +4,7 @@ from nxroms.readers import IReadable, Region
 from nxroms.nca.header import ContentType
 from nxroms.nca.nca import Nca
 from nxroms.nacp import Nacp
-from nxroms.rom import Nsp
+from nxroms.rom.nsp import Nsp
 
 from dataclasses import dataclass
 
@@ -13,6 +13,9 @@ import struct
 class GFileReadable(IReadable):
     def __init__(self, file: Gio.File):
         self.stream = file.read(None)
+    
+    def skip(self, bytes: int):
+        self.seek(self.tell() + bytes)
     
     def seek(self, offset):
         self.stream.seek(offset, GLib.SeekType.SET)
@@ -24,8 +27,7 @@ class GFileReadable(IReadable):
         self.seek(offset)
         return self.read(size)
     
-    # TODO: change this to read_to
-    def _read_to(self, size: int, format_str: str):
+    def read_unpack(self, size: int, format_str: str):
         r = self.read(size)
         return struct.unpack(format_str, r)[0]
 
@@ -34,7 +36,7 @@ class GFileReadable(IReadable):
         if not d:
             return
         
-        return struct.unpack(format_str, d)
+        return struct.unpack(format_str, d)[0]
 
     def dump(self, path):
         with open(path, "wb") as f:
