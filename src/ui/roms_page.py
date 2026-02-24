@@ -7,7 +7,7 @@ from ..modules.utils import add_toast
 
 from .dialogs import UploadAlert
 from ..modules.rom_info import RomInfo
-from nxroms.keys import KeysNotFound
+from nxroms.keyring import KeysNotFound
 
 import os
 

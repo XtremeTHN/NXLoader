@@ -29,11 +29,10 @@
       libgudev
     ];
   in {
-    
     devShells.${system}.default = pkgs.mkShell {
       inherit nativeBuildInputs buildInputs;
       packages = with pkgs; [
-        python3.pkgs.pygobject-stubs
+        ruff
       ];
     };
 
