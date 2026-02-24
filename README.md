@@ -6,9 +6,9 @@ A gtk app for installing switch games
 rewrite into another language
 
 ## Preview
-![1](.github/assets/1.png)
-![2](.github/assets/2.png)
-![3](.github/assets/3.png)
+<img width="650" height="550" alt="1" src="https://github.com/user-attachments/assets/bc133449-ae20-49e9-af3a-b6ae9ba49964" />
+<img width="650" height="550" alt="2" src="https://github.com/user-attachments/assets/a49306a7-c43e-4e8f-9540-e4d4ed04a47d" />
+<img width="650" height="550" alt="3" src="https://github.com/user-attachments/assets/2775af52-8885-4a9d-b4cd-c4625cd7ae86" />
 
 ## Known bugs
 This bugs may not be fixed cuz i don't know what is causing them
