@@ -31,7 +31,7 @@ This bugs may not be fixed cuz i don't know what is causing them
 - `blueprint-compiler`
 - `nxroms`
 
-You can get `nxroms` [here](https://github.com/XtremeTHN/NXLoader)
+You can get `nxroms` [here](https://github.com/XtremeTHN/nxroms)
 
 #### Installing
 
