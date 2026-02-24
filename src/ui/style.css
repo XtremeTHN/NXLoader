@@ -21,3 +21,7 @@
 .merged > trough > progress {
     border-top-left-radius: 0px;
 }
+
+frame {
+    border: 0px transparent solid;
+}
