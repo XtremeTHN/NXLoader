@@ -3,7 +3,7 @@
 A gtk app for installing switch games
 
 ## TODO
-rewrite into another language
+~~rewrite into another language~~ [lift](https://github.com/XtremeTHN/Lift)
 
 ## Preview
 <img width="650" height="550" alt="1" src="https://github.com/user-attachments/assets/bc133449-ae20-49e9-af3a-b6ae9ba49964" />
